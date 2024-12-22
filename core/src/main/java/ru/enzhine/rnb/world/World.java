@@ -1,7 +1,7 @@
 package ru.enzhine.rnb.world;
 
-import ru.enzhine.rnb.world.block.base.Block;
 import ru.enzhine.rnb.world.block.base.BlockType;
+import ru.enzhine.rnb.world.block.base.Block;
 
 public interface World {
     int BLOCK_PIXEL_SIZE = 16;

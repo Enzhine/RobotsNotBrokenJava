@@ -1,11 +1,10 @@
 package ru.enzhine.rnb.world.gen;
 
-import ru.enzhine.rnb.utils.Map2D;
 import ru.enzhine.rnb.world.Chunk;
 import ru.enzhine.rnb.world.World;
+import ru.enzhine.rnb.world.block.base.BlockType;
 import ru.enzhine.rnb.world.block.base.BiomeType;
 import ru.enzhine.rnb.world.block.base.BlockFactory;
-import ru.enzhine.rnb.world.block.base.BlockType;
 
 import java.util.List;
 

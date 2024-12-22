@@ -28,4 +28,9 @@ public class WorldBiome implements Placeable2D {
     public Long getY() {
         return y;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s at %d;%d", biomeType.toString(), x, y);
+    }
 }

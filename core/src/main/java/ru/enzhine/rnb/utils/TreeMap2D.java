@@ -34,8 +34,6 @@ public class TreeMap2D<V extends Placeable2D> implements Map2D<V> {
 
     public class TreeMap2DBoundedIterator implements Iterator<V> {
 
-        private final Long xMin;
-        private final Long xMax;
         private final Long yMin;
         private final Long yMax;
 
@@ -43,14 +41,12 @@ public class TreeMap2D<V extends Placeable2D> implements Map2D<V> {
         private Iterator<V> byYIterator;
 
         public TreeMap2DBoundedIterator(Long xMin, Long xMax, Long yMin, Long yMax) {
-            this.xMin = xMin;
-            this.xMax = xMax;
             this.yMin = yMin;
             this.yMax = yMax;
 
             this.byXIterator = byX.tailMap(xMin).headMap(xMax + 1).values().iterator();
             while(byXIterator.hasNext()) {
-                this.byYIterator = byXIterator.next().tailMap(yMin).headMap(yMax).values().iterator();
+                this.byYIterator = byXIterator.next().tailMap(yMin).headMap(yMax + 1).values().iterator();
 
                 if(this.byYIterator.hasNext()){
                     break;
@@ -71,7 +67,7 @@ public class TreeMap2D<V extends Placeable2D> implements Map2D<V> {
                     byYIterator = null;
                 } else {
                     while(byXIterator.hasNext()) {
-                        this.byYIterator = byXIterator.next().tailMap(yMin).headMap(yMax).values().iterator();
+                        this.byYIterator = byXIterator.next().tailMap(yMin).headMap(yMax + 1).values().iterator();
 
                         if(this.byYIterator.hasNext()){
                             break;
@@ -94,17 +90,13 @@ public class TreeMap2D<V extends Placeable2D> implements Map2D<V> {
 
     @Override
     public V put(V v) {
-        SortedMap<Long, V> mapY = byX.get(v.getX());
-        if(mapY == null) {
-            mapY = new TreeMap<>();
-            byX.put(v.getX(), mapY);
-        }
+        SortedMap<Long, V> mapY = byX.computeIfAbsent(v.getX(), k -> new TreeMap<>());
         return mapY.put(v.getY(), v);
     }
 
     @Override
     public Iterable<V> withinBounds(Long xMin, Long xMax, Long yMin, Long yMax) {
-        return new Iterable<V>() {
+        return new Iterable<>() {
             @NotNull
             @Override
             public Iterator<V> iterator() {

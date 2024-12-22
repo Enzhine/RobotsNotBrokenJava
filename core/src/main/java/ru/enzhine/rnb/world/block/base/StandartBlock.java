@@ -3,8 +3,8 @@ package ru.enzhine.rnb.world.block.base;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import ru.enzhine.rnb.render.Rendering;
 import ru.enzhine.rnb.world.Location;
+import ru.enzhine.rnb.render.Rendering;
 
 public abstract class StandartBlock implements Block, Rendering {
 

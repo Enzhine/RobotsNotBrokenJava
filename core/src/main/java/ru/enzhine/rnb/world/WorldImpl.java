@@ -2,31 +2,25 @@ package ru.enzhine.rnb.world;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import ru.enzhine.rnb.world.block.BiomeFactoryImpl;
+import ru.enzhine.rnb.world.block.base.BlockType;
 import ru.enzhine.rnb.render.Rendering;
 import ru.enzhine.rnb.utils.Map2D;
 import ru.enzhine.rnb.utils.TreeMap2D;
 import ru.enzhine.rnb.world.block.BlockFactoryImpl;
 import ru.enzhine.rnb.world.block.base.BiomeType;
 import ru.enzhine.rnb.world.block.base.Block;
-import ru.enzhine.rnb.world.block.base.BlockType;
 import ru.enzhine.rnb.world.block.base.Textures;
-import ru.enzhine.rnb.world.gen.ChunkGenerator;
-import ru.enzhine.rnb.world.gen.DynamicVoronoiChunkGenerator;
-import ru.enzhine.rnb.world.gen.StaticVoronoiChunkGenerator;
-import ru.enzhine.rnb.world.gen.WorldBiome;
+import ru.enzhine.rnb.world.gen.*;
 
+import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 public class WorldImpl implements World, Rendering {
 
     private final int chunkSize;
     private final Map2D<ChunkImpl> gameMap = new TreeMap2D<>();
-//    private List<WorldBiome> bbb = IntStream.iterate(0, i -> i < 10, i -> i + 1).mapToObj(i -> {
-//        return new WorldBiome(Math.random() > 0.5 ? BiomeType.RANDOM : BiomeType.RANDOM1, (long)(Math.random() * 30 - 15), (long)(Math.random() * 30 - 15));
-//    }).toList();
-//    private final ChunkGenerator chunkGen = new StaticVoronoiChunkGenerator(this, new BlockFactoryImpl(), bbb);
-    private final ChunkGenerator chunkGen = new DynamicVoronoiChunkGenerator(0.5f, this, new BlockFactoryImpl());
+    private final ChunkGenerator chunkGen = new LazyDeterminedVoronoiChunkGenerator(this, new BlockFactoryImpl(), new BiomeFactoryImpl(), 2f, 0.5f, 1);
 
     public WorldImpl(int chunkSize) {
         this.chunkSize = chunkSize;
@@ -91,11 +85,14 @@ public class WorldImpl implements World, Rendering {
         long xMax = (x + (long)viewport.getWorldWidth() / 2) / BLOCK_PIXEL_SIZE / chunkSize + 1;
         long yMin = (y - (long)viewport.getWorldHeight() / 2) / BLOCK_PIXEL_SIZE / chunkSize - 1;
         long yMax = (y + (long)viewport.getWorldHeight() / 2) / BLOCK_PIXEL_SIZE / chunkSize + 1;
+
+        LazyDeterminedVoronoiChunkGenerator chunkGenerator = (LazyDeterminedVoronoiChunkGenerator) chunkGen;
+        List<WorldBiome> wb = new LinkedList<>();
         for (ChunkImpl chunk : gameMap.withinBounds(xMin, xMax, yMin, yMax)) {
             chunk.render(batch, viewport);
+            chunkGenerator.appendCachedChunkBiomes(chunk.chunkX, chunk.chunkY, wb);
         }
-        // TODO: DEBUG CODE
-        for (WorldBiome biome : ((DynamicVoronoiChunkGenerator) chunkGen).getBiomes()) {
+        for (WorldBiome biome : wb) {
             batch.draw(Textures.getTexture("blocks/sandstone.png"), biome.getX() * 16, biome.getY() * 16);
         }
     }

@@ -24,9 +24,9 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
     final Block[] blockLayer;
     final byte[] lightLayer;
 
-    public ChunkImpl(World w, long x, long y){
-        this.chunkX = x;
-        this.chunkY = y;
+    public ChunkImpl(World w, long cX, long cY){
+        this.chunkX = cX;
+        this.chunkY = cY;
         this.chunkSize = w.chunkSize();
         this.world = w;
         blockLayer = new Block[this.chunkSize * this.chunkSize];
