@@ -2,6 +2,9 @@ package ru.enzhine.rnb.utils;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import ru.enzhine.rnb.utils.adt.Map2D;
+import ru.enzhine.rnb.utils.adt.Placeable2D;
+import ru.enzhine.rnb.utils.adt.TreeMap2D;
 
 import java.util.LinkedHashSet;
 import java.util.Objects;

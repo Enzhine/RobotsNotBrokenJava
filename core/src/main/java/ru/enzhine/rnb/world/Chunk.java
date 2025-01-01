@@ -9,7 +9,11 @@ public interface Chunk {
 
     Long getOffsetX();
 
+    Long getGlobalX();
+
     Long getOffsetY();
+
+    Long getGlobalY();
 
     void set(Block b);
 

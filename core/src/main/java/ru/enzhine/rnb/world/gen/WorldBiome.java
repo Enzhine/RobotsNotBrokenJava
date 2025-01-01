@@ -1,9 +1,9 @@
 package ru.enzhine.rnb.world.gen;
 
-import ru.enzhine.rnb.utils.Placeable2D;
+import ru.enzhine.rnb.utils.adt.PlaceableValue2D;
 import ru.enzhine.rnb.world.block.base.BiomeType;
 
-public class WorldBiome implements Placeable2D {
+public class WorldBiome implements PlaceableValue2D<BiomeType> {
 
     private final BiomeType biomeType;
     private final long x;
@@ -15,7 +15,7 @@ public class WorldBiome implements Placeable2D {
         this.y = y;
     }
 
-    public BiomeType getBiomeType() {
+    public BiomeType get() {
         return biomeType;
     }
 

@@ -1,6 +1,9 @@
 package ru.enzhine.rnb.world.block.base;
 
 public enum BiomeType {
-    RANDOM,
-    RANDOM1,
+    LIGHT,
+    UNIQUE,
+    HEAVY,
+    DESERT,
+    ORGANIC
 }

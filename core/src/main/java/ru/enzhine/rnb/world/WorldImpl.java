@@ -1,50 +1,68 @@
 package ru.enzhine.rnb.world;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import ru.enzhine.rnb.world.block.BiomeFactoryImpl;
 import ru.enzhine.rnb.world.block.base.BlockType;
 import ru.enzhine.rnb.render.Rendering;
-import ru.enzhine.rnb.utils.Map2D;
-import ru.enzhine.rnb.utils.TreeMap2D;
+import ru.enzhine.rnb.utils.adt.Map2D;
+import ru.enzhine.rnb.utils.adt.TreeMap2D;
 import ru.enzhine.rnb.world.block.BlockFactoryImpl;
 import ru.enzhine.rnb.world.block.base.BiomeType;
 import ru.enzhine.rnb.world.block.base.Block;
-import ru.enzhine.rnb.world.block.base.Textures;
 import ru.enzhine.rnb.world.gen.*;
-
-import java.util.LinkedList;
-import java.util.List;
 
 public class WorldImpl implements World, Rendering {
 
     private final int chunkSize;
-    private final Map2D<ChunkImpl> gameMap = new TreeMap2D<>();
-    private final ChunkGenerator chunkGen = new LazyDeterminedVoronoiChunkGenerator(this, new BlockFactoryImpl(), new BiomeFactoryImpl(), 2f, 0.5f, 1);
+    private final long seed;
+    private final Map2D<ChunkImpl> gameMap;
+    private final ChunkGenerator chunkGen;
 
-    public WorldImpl(int chunkSize) {
+    public WorldImpl(int chunkSize, long seed, float biomesPerChunk, float gapProbability) {
         this.chunkSize = chunkSize;
+        this.seed = seed;
+        this.gameMap = new TreeMap2D<>();
+        this.chunkGen = new LazyDeterminedVoronoiChunkGenerator(
+                this,
+                new BlockFactoryImpl(),
+                new WorldBiomeFactoryImpl(),
+                new BlockTypeGeneratorImpl(),
+                new BiomeGeneratorImpl(),
+                new OreProcessorGeneratorImpl(),
+                this.seed,
+                biomesPerChunk,
+                gapProbability
+        );
     }
 
-    public long chunkOffset(Long xy){
-        return xy / chunkSize;
+    public long chunkOffset(Long xy) {
+        var result = (double) xy / chunkSize;
+        return result > 0 ? (long) result : (long) Math.floor(result);
     }
 
-    public int chunkLocal(Long xy){
-        return (int) (xy % chunkSize);
+    public int chunkLocal(Long xy) {
+        int res = (int) (xy % chunkSize);
+        if (res < 0) {
+            res += chunkSize;
+        }
+        return res;
     }
 
     @Override
     public void setBlock(BlockType type, Long x, Long y) {
-        Chunk c = getChunk(x, y);
+        Chunk c = getChunk(x, y, true);
         BiomeType bt = chunkGen.getBiome(x, y);
         Block b = chunkGen.getBlockFactory().makeBlock(type, x, y, bt, c);
         c.set(b);
     }
 
     @Override
-    public Block getBlock(Long x, Long y) {
-        Chunk c = getChunk(x, y);
+    public Block getBlock(Long x, Long y, boolean loadChunk) {
+        Chunk c = getChunk(x, y, loadChunk);
+        if (c == null) {
+            return null;
+        }
         return c.get(chunkLocal(x), chunkLocal(y));
     }
 
@@ -64,9 +82,9 @@ public class WorldImpl implements World, Rendering {
     }
 
     @Override
-    public Chunk getChunk(Long x, Long y) {
+    public Chunk getChunk(Long x, Long y, boolean loadChunk) {
         Chunk c = gameMap.at(chunkOffset(x), chunkOffset(y));
-        if(c == null){
+        if (c == null && loadChunk) {
             c = genChunkAt(chunkOffset(x), chunkOffset(y));
         }
         return c;
@@ -78,22 +96,30 @@ public class WorldImpl implements World, Rendering {
     }
 
     @Override
-    public void render(SpriteBatch batch, Viewport viewport) {
+    public void batchRender(SpriteBatch batch, Viewport viewport) {
         long x = (long) viewport.getCamera().position.x;
         long y = (long) viewport.getCamera().position.y;
-        long xMin = (x - (long)viewport.getWorldWidth() / 2) / BLOCK_PIXEL_SIZE / chunkSize - 1;
-        long xMax = (x + (long)viewport.getWorldWidth() / 2) / BLOCK_PIXEL_SIZE / chunkSize + 1;
-        long yMin = (y - (long)viewport.getWorldHeight() / 2) / BLOCK_PIXEL_SIZE / chunkSize - 1;
-        long yMax = (y + (long)viewport.getWorldHeight() / 2) / BLOCK_PIXEL_SIZE / chunkSize + 1;
+        long xMin = (x - (long) viewport.getWorldWidth() / 2) / BLOCK_PIXEL_SIZE / chunkSize - 1;
+        long xMax = (x + (long) viewport.getWorldWidth() / 2) / BLOCK_PIXEL_SIZE / chunkSize + 1;
+        long yMin = (y - (long) viewport.getWorldHeight() / 2) / BLOCK_PIXEL_SIZE / chunkSize - 1;
+        long yMax = (y + (long) viewport.getWorldHeight() / 2) / BLOCK_PIXEL_SIZE / chunkSize + 1;
 
-        LazyDeterminedVoronoiChunkGenerator chunkGenerator = (LazyDeterminedVoronoiChunkGenerator) chunkGen;
-        List<WorldBiome> wb = new LinkedList<>();
         for (ChunkImpl chunk : gameMap.withinBounds(xMin, xMax, yMin, yMax)) {
-            chunk.render(batch, viewport);
-            chunkGenerator.appendCachedChunkBiomes(chunk.chunkX, chunk.chunkY, wb);
+            chunk.batchRender(batch, viewport);
         }
-        for (WorldBiome biome : wb) {
-            batch.draw(Textures.getTexture("blocks/sandstone.png"), biome.getX() * 16, biome.getY() * 16);
+    }
+
+    @Override
+    public void shapeRender(ShapeRenderer renderer, Viewport viewport) {
+        long x = (long) viewport.getCamera().position.x;
+        long y = (long) viewport.getCamera().position.y;
+        long xMin = (x - (long) viewport.getWorldWidth() / 2) / BLOCK_PIXEL_SIZE / chunkSize - 1;
+        long xMax = (x + (long) viewport.getWorldWidth() / 2) / BLOCK_PIXEL_SIZE / chunkSize + 1;
+        long yMin = (y - (long) viewport.getWorldHeight() / 2) / BLOCK_PIXEL_SIZE / chunkSize - 1;
+        long yMax = (y + (long) viewport.getWorldHeight() / 2) / BLOCK_PIXEL_SIZE / chunkSize + 1;
+
+        for (ChunkImpl chunk : gameMap.withinBounds(xMin, xMax, yMin, yMax)) {
+            chunk.shapeRender(renderer, viewport);
         }
     }
 }

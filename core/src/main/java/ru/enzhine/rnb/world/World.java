@@ -8,9 +8,9 @@ public interface World {
 
     void setBlock(BlockType type, Long x, Long y);
 
-    Block getBlock(Long x, Long y);
+    Block getBlock(Long x, Long y, boolean loadChunk);
 
-    Chunk getChunk(Long x, Long y);
+    Chunk getChunk(Long x, Long y, boolean loadChunk);
 
     int chunkSize();
 }

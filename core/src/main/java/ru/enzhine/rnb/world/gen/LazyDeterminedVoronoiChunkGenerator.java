@@ -2,14 +2,12 @@ package ru.enzhine.rnb.world.gen;
 
 import ru.enzhine.rnb.world.Chunk;
 import ru.enzhine.rnb.world.World;
-import ru.enzhine.rnb.world.block.base.BiomeFactory;
+import ru.enzhine.rnb.world.WorldBiomeFactory;
 import ru.enzhine.rnb.world.block.base.BiomeType;
 import ru.enzhine.rnb.world.block.base.BlockFactory;
-import ru.enzhine.rnb.world.block.base.BlockType;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -21,31 +19,55 @@ public class LazyDeterminedVoronoiChunkGenerator implements ChunkGenerator {
 
     private final World world;
     private BlockFactory blockFactory;
-    private BiomeFactory biomeFactory;
+    private WorldBiomeFactory worldBiomeFactory;
+    private BlockTypeGenerator blockTypeGenerator;
+    private BiomeTypeGenerator biomeTypeGenerator;
+    private OreProcessorGenerator oreProcessorGenerator;
 
-    private final float bpc;
-    private final float gp;
     private final long seed;
     private final Random rand;
+    private final float bpc;
+    private final float gp;
 
-    public LazyDeterminedVoronoiChunkGenerator(World world, BlockFactory blockFactory, BiomeFactory biomeFactory, float biomesPerChunk, float gapProbability) {
-        this(world, blockFactory, biomeFactory, biomesPerChunk, gapProbability, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-    }
-
-    public LazyDeterminedVoronoiChunkGenerator(World world, BlockFactory blockFactory, BiomeFactory biomeFactory,
-                                               float biomesPerChunk, float gapProbability, long seed) {
-        this.blockFactory = blockFactory;
-        this.biomeFactory = biomeFactory;
+    public LazyDeterminedVoronoiChunkGenerator(
+            World world,
+            BlockFactory blockFactory,
+            WorldBiomeFactory worldBiomeFactory,
+            BlockTypeGenerator blockTypeGenerator,
+            BiomeTypeGenerator biomeTypeGenerator,
+            OreProcessorGenerator oreProcessorGenerator,
+            long seed,
+            float biomesPerChunk,
+            float gapProbability
+    ) {
         this.world = world;
+        this.blockFactory = blockFactory;
+        this.worldBiomeFactory = worldBiomeFactory;
+        this.blockTypeGenerator = blockTypeGenerator;
+        this.biomeTypeGenerator = biomeTypeGenerator;
+        this.oreProcessorGenerator = oreProcessorGenerator;
         this.seed = seed;
-        this.rand = new Random();
 
+        this.rand = new Random();
         assert biomesPerChunk > 0f;
         this.bpc = biomesPerChunk;
-
         assert gapProbability > 0f;
         assert gapProbability <= 1f;
         this.gp = gapProbability;
+    }
+
+    public LazyDeterminedVoronoiChunkGenerator(
+            World world,
+            BlockFactory blockFactory,
+            WorldBiomeFactory worldBiomeFactory,
+            BlockTypeGenerator blockTypeGenerator,
+            BiomeTypeGenerator biomeTypeGenerator,
+            OreProcessorGenerator oreProcessorGenerator,
+            float biomesPerChunk,
+            float gapProbability
+    ) {
+        this(world, blockFactory, worldBiomeFactory, blockTypeGenerator, biomeTypeGenerator, oreProcessorGenerator,
+                LocalDateTime.now().toEpochSecond(ZoneOffset.UTC), biomesPerChunk, gapProbability);
     }
 
     @Override
@@ -55,17 +77,23 @@ public class LazyDeterminedVoronoiChunkGenerator implements ChunkGenerator {
             for (int y = 0; y < chunkSize(); ++y) {
                 long blockX = chunkGlobalXY(c.getOffsetX()) + (long) x;
                 long blockY = chunkGlobalXY(c.getOffsetY()) + (long) y;
-                BiomeType biome = getClosestBiome(blockX, blockY, biomes).getBiomeType();
+                BiomeType biomeType = getClosestBiome(blockX, blockY, biomes).get();
 
-                c.set(blockFactory.makeBlock(blockTypeByBiome(biome), blockX, blockY, biome, c));
+                var oreProcessor = oreProcessorGenerator.getOreProcessor(blockX, blockY, biomeType, this.rand);
+                if (oreProcessor != null) {
+                    oreProcessor.process(blockX, blockY, c, biomeType, blockFactory, this.rand);
+                }else {
+                    var blockType = blockTypeGenerator.getBlockType(blockX, blockY, biomeType, this.rand);
+                    c.set(blockFactory.makeBlock(blockType, blockX, blockY, biomeType, c));
+                }
             }
         }
     }
 
     @Override
     public BiomeType getBiome(long x, long y) {
-        var biomes = getChunkBiomes(x / chunkSize(),  y / chunkSize());
-        return getClosestBiome(x, y, biomes).getBiomeType();
+        var biomes = getChunkBiomes(x / chunkSize(), y / chunkSize());
+        return getClosestBiome(x, y, biomes).get();
     }
 
     @Override
@@ -76,13 +104,6 @@ public class LazyDeterminedVoronoiChunkGenerator implements ChunkGenerator {
     @Override
     public BlockFactory getBlockFactory() {
         return blockFactory;
-    }
-
-    BlockType blockTypeByBiome(BiomeType biomeType) {
-        return switch (biomeType) {
-            case RANDOM -> BlockType.DIRT;
-            case RANDOM1 -> BlockType.STONE;
-        };
     }
 
     private Long chunkGlobalXY(long cXY) {
@@ -98,23 +119,25 @@ public class LazyDeterminedVoronoiChunkGenerator implements ChunkGenerator {
     }
 
     private long getChunkHash(long cX, long cY) {
-        return cX + 100003L * cY + seed;
+        return seed - cX * 100003L + cY * 8497519L;
     }
 
     public void appendCachedChunkBiomes(long cX, long cY, List<WorldBiome> cache) {
         this.rand.setSeed(getChunkHash(cX, cY));
 
         float probability = this.rand.nextFloat();
-        int count = 0;
+        int count;
         if (this.bpc > 1.0f) {
             count = (int) ceil(probability * (this.bpc + 1) - 1);
         } else {
             count = probability < this.bpc ? 1 : 0;
         }
         for (int i = 0; i < count; i++) {
-            long x = rand.nextInt(chunkSize());
-            long y = rand.nextInt(chunkSize());
-            cache.add(biomeFactory.getBiome(chunkGlobalXY(cX) + x, chunkGlobalXY(cY) + y, this.rand));
+            long x = chunkGlobalXY(cX) + rand.nextInt(chunkSize());
+            long y = chunkGlobalXY(cY) + rand.nextInt(chunkSize());
+            var biomeType = biomeTypeGenerator.getBiomeType(x, y, this.rand);
+
+            cache.add(worldBiomeFactory.makeWorldBiome(x, y, biomeType));
         }
     }
 
@@ -130,8 +153,8 @@ public class LazyDeterminedVoronoiChunkGenerator implements ChunkGenerator {
         int r = lookupRadius();
         var biomes = new LinkedList<WorldBiome>();
 
-        for (long x = cX - r; x <= cX + r ; x++) {
-            for (long y = cY - r; y <= cY + r ; y++) {
+        for (long x = cX - r; x <= cX + r; x++) {
+            for (long y = cY - r; y <= cY + r; y++) {
                 appendCachedChunkBiomes(x, y, biomes);
             }
         }

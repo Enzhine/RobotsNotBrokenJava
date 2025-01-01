@@ -1,4 +1,4 @@
-package ru.enzhine.rnb.utils;
+package ru.enzhine.rnb.utils.adt;
 
 import org.jetbrains.annotations.NotNull;
 

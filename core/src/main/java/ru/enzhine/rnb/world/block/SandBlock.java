@@ -5,8 +5,8 @@ import ru.enzhine.rnb.world.Location;
 import ru.enzhine.rnb.world.block.base.BiomeType;
 import ru.enzhine.rnb.world.block.base.StandartBlock;
 
-public class SandstoneBlock extends StandartBlock {
-    public SandstoneBlock(Location loc, BiomeType biomeType) {
-        super("blocks/sandstone.png", loc, BlockType.SANDSTONE, biomeType);
+public class SandBlock extends StandartBlock {
+    public SandBlock(Location loc, BiomeType biomeType) {
+        super("blocks/sand.png", loc, BlockType.SAND, biomeType);
     }
 }

@@ -1,8 +1,10 @@
 package ru.enzhine.rnb.render;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public interface Rendering {
-    void render(SpriteBatch batch, Viewport viewport);
+    void batchRender(SpriteBatch batch, Viewport viewport);
+    void shapeRender(ShapeRenderer renderer, Viewport viewport);
 }

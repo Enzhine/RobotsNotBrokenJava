@@ -14,7 +14,9 @@ public class BlockFactoryImpl implements BlockFactory {
         Location newLoc = new Location((double)x, (double)y, c);
         return switch (type) {
             case DIRT -> new DirtBlock(newLoc, biome);
-            case SANDSTONE -> new SandstoneBlock(newLoc, biome);
+            case SAND -> new SandBlock(newLoc, biome);
+            case SOFT_STONE -> new SoftStoneBlock(newLoc, biome);
+            case HARD_STONE -> new HardStoneBlock(newLoc, biome);
             case STONE -> new StoneBlock(newLoc, biome);
         };
     }

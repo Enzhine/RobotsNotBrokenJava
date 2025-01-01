@@ -2,9 +2,10 @@ package ru.enzhine.rnb.world;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import ru.enzhine.rnb.render.Rendering;
-import ru.enzhine.rnb.utils.Placeable2D;
+import ru.enzhine.rnb.utils.adt.Placeable2D;
 import ru.enzhine.rnb.world.block.base.Block;
 import ru.enzhine.rnb.world.entity.Entity;
 
@@ -35,15 +36,33 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
     }
 
     Block getBlockByLocal(int localX, int localY) {
-        return blockLayer[localX * this.chunkSize + localY];
+        if (localX < 0 || localX >= chunkSize) {
+            throw new IndexOutOfBoundsException(String.format("localX index must be withing %d and exclusive %d", 0, chunkSize));
+        }
+        if (localY < 0 || localY >= chunkSize) {
+            throw new IndexOutOfBoundsException(String.format("localY index must be withing %d and exclusive %d", 0, chunkSize));
+        }
+        return blockLayer[localY * this.chunkSize + localX];
     }
 
     byte getLightByLocal(int localX, int localY) {
-        return lightLayer[localX * this.chunkSize + localY];
+        if (localX < 0 || localX >= chunkSize) {
+            throw new IndexOutOfBoundsException(String.format("localX index must be withing %d and exclusive %d", 0, chunkSize));
+        }
+        if (localY < 0 || localY >= chunkSize) {
+            throw new IndexOutOfBoundsException(String.format("localY index must be withing %d and exclusive %d", 0, chunkSize));
+        }
+        return lightLayer[localY * this.chunkSize + localX];
     }
 
     void setBlockByLocal(Block b, int localX, int localY) {
-        blockLayer[localX * this.chunkSize + localY] = b;
+        if (localX < 0 || localX >= chunkSize) {
+            throw new IndexOutOfBoundsException(String.format("localX index must be withing %d and exclusive %d", 0, chunkSize));
+        }
+        if (localY < 0 || localY >= chunkSize) {
+            throw new IndexOutOfBoundsException(String.format("localY index must be withing %d and exclusive %d", 0, chunkSize));
+        }
+        blockLayer[localY * this.chunkSize + localX] = b;
     }
 
     int globalToLocalXY(long xy) {
@@ -70,9 +89,15 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
     }
 
     @Override
+    public Long getGlobalX() {return chunkX * chunkSize;}
+
+    @Override
     public Long getOffsetY() {
         return chunkY;
     }
+
+    @Override
+    public Long getGlobalY() {return chunkY * chunkSize;}
 
     @Override
     public void set(Block b) {
@@ -83,7 +108,11 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
 
     @Override
     public Block get(int localX, int localY) {
-        return getBlockByLocal(localX, localY);
+        try {
+            return getBlockByLocal(localX, localY);
+        }catch (IndexOutOfBoundsException ex) {
+            return null;
+        }
     }
 
     @Override
@@ -111,7 +140,7 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
     }
 
     @Override
-    public void render(SpriteBatch batch, Viewport viewport) {
+    public void batchRender(SpriteBatch batch, Viewport viewport) {
         for (int i = 0; i < blockLayer.length; i++) {
             Block b = blockLayer[i];
             float tint = colorOfLevel(lightLayer[i]);
@@ -119,8 +148,18 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
             if (b instanceof Rendering) {
                 Color prev = batch.getColor();
                 batch.setColor(tint, tint, tint, 1f);
-                ((Rendering) b).render(batch, viewport);
+                ((Rendering) b).batchRender(batch, viewport);
                 batch.setColor(prev);
+            }
+        }
+    }
+
+    @Override
+    public void shapeRender(ShapeRenderer renderer, Viewport viewport) {
+        for (int i = 0; i < blockLayer.length; i++) {
+            Block b = blockLayer[i];
+            if (b instanceof Rendering) {
+                ((Rendering) b).shapeRender(renderer, viewport);
             }
         }
     }

@@ -5,4 +5,7 @@ eclipse.project.name = appName + "-core"
 
 dependencies {
     implementation 'org.junit.jupiter:junit-jupiter:5.11.0-M1'
+
+    compileOnly 'org.projectlombok:lombok:1.18.20'
+    annotationProcessor 'org.projectlombok:lombok:1.18.20'
 }
