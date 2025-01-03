@@ -1,11 +1,12 @@
 package ru.enzhine.rnb.world;
 
+import ru.enzhine.rnb.world.block.base.Ticking;
 import ru.enzhine.rnb.world.entity.Entity;
 import ru.enzhine.rnb.world.block.base.Block;
 
 import java.util.ListIterator;
 
-public interface Chunk {
+public interface Chunk extends Ticking {
 
     Long getOffsetX();
 

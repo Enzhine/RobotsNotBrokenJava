@@ -1,7 +1,7 @@
 package ru.enzhine.rnb.world.block.base;
 
 import ru.enzhine.rnb.world.Location;
-import ru.enzhine.rnb.world.material.Material;
+import ru.enzhine.rnb.world.Material;
 
 public interface Block {
 

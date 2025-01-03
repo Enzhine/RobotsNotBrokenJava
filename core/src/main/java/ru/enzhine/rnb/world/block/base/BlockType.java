@@ -1,6 +1,7 @@
 package ru.enzhine.rnb.world.block.base;
 
 public enum BlockType {
+    AIR,
     SOIL,
     RICH_SOIL,
     SAND,

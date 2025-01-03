@@ -3,11 +3,11 @@
   "layers": [
     {
       "type": "path",
-      "path": "blocks/soft_stone.png"
+      "path": "block/stone.png"
     },
     {
       "type": "path",
-      "path": "blocks/ores/coal_layer.png"
+      "path": "block/ore/coal_layer.png"
     }
   ]
 }

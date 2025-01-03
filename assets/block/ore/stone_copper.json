@@ -3,11 +3,11 @@
   "layers": [
     {
       "type": "path",
-      "path": "blocks/stone.png"
+      "path": "block/stone.png"
     },
     {
       "type": "path",
-      "path": "blocks/ores/copper_layer.png"
+      "path": "block/ore/copper_layer.png"
     }
   ]
 }

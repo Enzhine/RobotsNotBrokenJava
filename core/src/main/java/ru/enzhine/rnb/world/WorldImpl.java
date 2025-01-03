@@ -121,4 +121,11 @@ public class WorldImpl implements World, Rendering {
             chunk.shapeRender(renderer, viewport);
         }
     }
+
+    @Override
+    public void onTick() {
+        for (ChunkImpl chunk : gameMap) {
+            chunk.onTick();
+        }
+    }
 }

@@ -10,6 +10,7 @@ public class BlockFactoryImpl implements BlockFactory {
     public Block makeBlock(BlockType type, long x, long y, BiomeType biome, Chunk c) {
         Location newLoc = new Location((double)x, (double)y, c);
         return switch (type) {
+            case AIR -> new AirBlock(newLoc, biome);
             case SOIL -> new SoilBlock(newLoc, biome);
             case RICH_SOIL -> new RichSoilBlock(newLoc, biome);
             case SAND -> new SandBlock(newLoc, biome);

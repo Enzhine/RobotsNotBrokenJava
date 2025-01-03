@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import ru.enzhine.rnb.render.Rendering;
 import ru.enzhine.rnb.utils.adt.Placeable2D;
 import ru.enzhine.rnb.world.block.base.Block;
+import ru.enzhine.rnb.world.block.base.Ticking;
 import ru.enzhine.rnb.world.entity.Entity;
 
 import java.util.Arrays;
@@ -17,7 +18,7 @@ import java.util.ListIterator;
 public class ChunkImpl implements Chunk, Placeable2D, Rendering {
     final long chunkX;
     final long chunkY;
-    boolean loaded = false;
+    boolean loaded = true;
     final World world;
 
     List<Entity> entities = new LinkedList<>();
@@ -160,6 +161,15 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
             Block b = blockLayer[i];
             if (b instanceof Rendering) {
                 ((Rendering) b).shapeRender(renderer, viewport);
+            }
+        }
+    }
+
+    @Override
+    public void onTick() {
+        for (Block b : blockLayer) {
+            if (b instanceof Ticking) {
+                ((Ticking) b).onTick();
             }
         }
     }

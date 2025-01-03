@@ -10,11 +10,12 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import ru.enzhine.rnb.world.Fluid;
 import ru.enzhine.rnb.world.Location;
 import ru.enzhine.rnb.world.WorldImpl;
-import ru.enzhine.rnb.world.block.base.StandartBlock;
+import ru.enzhine.rnb.world.block.base.*;
 
-import static ru.enzhine.rnb.world.block.base.StandartBlock.TEXTURE_WH;
+import static ru.enzhine.rnb.world.block.base.OpaqueBlock.TEXTURE_WH;
 
 public class Main extends ApplicationAdapter {
     SpriteBatch batch;
@@ -49,7 +50,7 @@ public class Main extends ApplicationAdapter {
         var font = new BitmapFont();
         var loc = new Location((double) proj.x / TEXTURE_WH, (double) proj.y / TEXTURE_WH, w.getChunk(0L, 0L, false));
         var chunk = w.getChunk(loc.getBlockX(), loc.getBlockY(), false);
-        var block = (StandartBlock) w.getBlock(loc.getBlockX(), loc.getBlockY(), false);
+        var block = (OpaqueBlock) w.getBlock(loc.getBlockX(), loc.getBlockY(), false);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(Color.RED);
         if (chunk != null) {
@@ -126,7 +127,7 @@ public class Main extends ApplicationAdapter {
             );
             font.draw(
                     batch,
-                    String.format("C(%d;%d) "+block.getBiome(), chunk.getOffsetX(), chunk.getOffsetY()),
+                    String.format("C(%d;%d) " + block.getBiome(), chunk.getOffsetX(), chunk.getOffsetY()),
                     loc.getBlockX() * TEXTURE_WH,
                     (loc.getBlockY() - 2) * TEXTURE_WH
             );
@@ -146,6 +147,37 @@ public class Main extends ApplicationAdapter {
 
     private final Vector3 lastPos = new Vector3(0, 0, 0);
 
+    private void trySetAir() {
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            var proj = getCurrentPos();
+            var loc = new Location((double) proj.x / TEXTURE_WH, (double) proj.y / TEXTURE_WH, w.getChunk(0L, 0L, false));
+            Block b = w.getBlock(loc.getBlockX(), loc.getBlockY(), false);
+            if (b == null) {
+                return;
+            }
+            if (b.getType() != BlockType.AIR) {
+                w.setBlock(BlockType.AIR, loc.getBlockX(), loc.getBlockY());
+            } else {
+                Floodable f = (Floodable) b;
+                f.setLevel(Fluid.WATER, (byte) 16);
+            }
+        }
+    }
+
+    private void tryTick() {
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.MIDDLE)) {
+            var proj = getCurrentPos();
+            var loc = new Location((double) proj.x / TEXTURE_WH, (double) proj.y / TEXTURE_WH, w.getChunk(0L, 0L, false));
+            Block b = w.getBlock(loc.getBlockX(), loc.getBlockY(), false);
+            if (b == null) {
+                return;
+            }
+            if (b instanceof Ticking) {
+                ((Ticking)b).onTick();
+            }
+        }
+    }
+
     private void tryMove() {
         if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
             var scaleX = ev.getWorldWidth() / ev.getScreenWidth();
@@ -158,6 +190,8 @@ public class Main extends ApplicationAdapter {
     @Override
     public void render() {
         tryMove();
+        tryTick();
+        trySetAir();
         ScreenUtils.clear(0, 0, 0, 1);
         ev.apply();
         batch.setProjectionMatrix(ev.getCamera().combined);
@@ -168,6 +202,7 @@ public class Main extends ApplicationAdapter {
         w.shapeRender(shapeRenderer, ev);
         drawBlockInfo();
         drawFPS();
+        w.onTick();
     }
 
     @Override

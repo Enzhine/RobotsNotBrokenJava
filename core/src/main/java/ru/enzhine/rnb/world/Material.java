@@ -1,6 +1,7 @@
-package ru.enzhine.rnb.world.material;
+package ru.enzhine.rnb.world;
 
 public enum Material {
+    DYNAMIC,
     SOFT_STONE,
     STONE,
     HARD_STONE,
