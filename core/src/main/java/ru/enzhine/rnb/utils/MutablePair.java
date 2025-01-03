@@ -5,8 +5,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-@EqualsAndHashCode
 @AllArgsConstructor
+@EqualsAndHashCode
 @Getter
 @Setter
 public class MutablePair<A, B> {

@@ -4,5 +4,5 @@ import ru.enzhine.rnb.world.Chunk;
 
 public interface BlockFactory {
 
-    Block makeBlock(BlockType type, Long x, Long y, BiomeType biome, Chunk c);
+    Block makeBlock(BlockType type, long x, long y, BiomeType biome, Chunk c);
 }

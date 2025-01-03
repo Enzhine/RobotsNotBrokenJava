@@ -3,11 +3,13 @@ package ru.enzhine.rnb.world;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import ru.enzhine.rnb.utils.MathUtils;
+import ru.enzhine.rnb.world.block.base.BlockFactory;
 import ru.enzhine.rnb.world.block.base.BlockType;
 import ru.enzhine.rnb.render.Rendering;
 import ru.enzhine.rnb.utils.adt.Map2D;
 import ru.enzhine.rnb.utils.adt.TreeMap2D;
-import ru.enzhine.rnb.world.block.BlockFactoryImpl;
+import ru.enzhine.rnb.world.block.base.BlockFactoryImpl;
 import ru.enzhine.rnb.world.block.base.BiomeType;
 import ru.enzhine.rnb.world.block.base.Block;
 import ru.enzhine.rnb.world.gen.*;
@@ -18,42 +20,39 @@ public class WorldImpl implements World, Rendering {
     private final long seed;
     private final Map2D<ChunkImpl> gameMap;
     private final ChunkGenerator chunkGen;
+    private final BlockFactory blockFactory;
 
     public WorldImpl(int chunkSize, long seed, float biomesPerChunk, float gapProbability) {
         this.chunkSize = chunkSize;
         this.seed = seed;
         this.gameMap = new TreeMap2D<>();
+        this.blockFactory = new BlockFactoryImpl();
         this.chunkGen = new LazyDeterminedVoronoiChunkGenerator(
                 this,
-                new BlockFactoryImpl(),
                 new WorldBiomeFactoryImpl(),
-                new BlockTypeGeneratorImpl(),
+                new BlockGeneratorImpl(this.blockFactory),
                 new BiomeGeneratorImpl(),
-                new OreProcessorGeneratorImpl(),
+                new OreProcessorGeneratorImpl(this.blockFactory),
                 this.seed,
                 biomesPerChunk,
                 gapProbability
         );
     }
 
-    public long chunkOffset(Long xy) {
+    public long chunkOffset(long xy) {
         var result = (double) xy / chunkSize;
         return result > 0 ? (long) result : (long) Math.floor(result);
     }
 
-    public int chunkLocal(Long xy) {
-        int res = (int) (xy % chunkSize);
-        if (res < 0) {
-            res += chunkSize;
-        }
-        return res;
+    public int chunkLocal(long xy) {
+        return MathUtils.remainder(xy, chunkSize);
     }
 
     @Override
     public void setBlock(BlockType type, Long x, Long y) {
         Chunk c = getChunk(x, y, true);
         BiomeType bt = chunkGen.getBiome(x, y);
-        Block b = chunkGen.getBlockFactory().makeBlock(type, x, y, bt, c);
+        Block b = this.blockFactory.makeBlock(type, x, y, bt, c);
         c.set(b);
     }
 

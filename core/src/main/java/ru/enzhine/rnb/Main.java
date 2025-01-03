@@ -132,6 +132,7 @@ public class Main extends ApplicationAdapter {
             );
         }
         batch.end();
+        font.dispose();
     }
 
     private void drawFPS() {
@@ -140,6 +141,7 @@ public class Main extends ApplicationAdapter {
         var proj = ev.getCamera().unproject(new Vector3(1, 1, 0));
         font.draw(batch, "FPS " + Gdx.graphics.getFramesPerSecond(), proj.x, proj.y);
         batch.end();
+        font.dispose();
     }
 
     private final Vector3 lastPos = new Vector3(0, 0, 0);
@@ -171,5 +173,6 @@ public class Main extends ApplicationAdapter {
     @Override
     public void dispose() {
         batch.dispose();
+        shapeRenderer.dispose();
     }
 }

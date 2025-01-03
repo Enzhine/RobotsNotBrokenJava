@@ -7,6 +7,7 @@ import java.util.Random;
 import java.util.function.Function;
 
 import lombok.Data;
+import ru.enzhine.rnb.utils.ImmutablePair;
 import ru.enzhine.rnb.utils.MutablePair;
 
 /**
@@ -25,14 +26,14 @@ public class BiasedRandomPicker<T> implements RandomPicker<T> {
 
     private final List<Bucket> buckets;
 
-    public BiasedRandomPicker(Map<Integer, T> biasedValues, Function<Float, Boolean> isEqualToZero) {
-        int n = biasedValues.keySet().size();
-        int sum = biasedValues.keySet().stream().mapToInt(Integer::intValue).sum();
-        List<MutablePair<Float, T>> floatMap = biasedValues.entrySet().stream().map(e -> new MutablePair<>((float) e.getKey() / sum, e.getValue())).toList();
+    public BiasedRandomPicker(List<ImmutablePair<Integer, T>> biasedValues, Function<Float, Boolean> isEqualToZero) {
+        int n = biasedValues.size();
+        int sum = biasedValues.stream().mapToInt(ImmutablePair::getLeft).sum();
+        List<MutablePair<Float, T>> floatMap = biasedValues.stream().map(e -> new MutablePair<>((float) e.getLeft() / sum, e.getRight())).toList();
         this.buckets = makeBuckets(floatMap, (float) 1 / n, isEqualToZero);
     }
 
-    public BiasedRandomPicker(Map<Integer, T> biasedValues) {
+    public BiasedRandomPicker(List<ImmutablePair<Integer, T>> biasedValues) {
         this(biasedValues, value -> (value == 0 || Math.abs(value) < 1e-6));
     }
 

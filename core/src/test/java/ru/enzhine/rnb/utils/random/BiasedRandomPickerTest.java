@@ -2,8 +2,9 @@ package ru.enzhine.rnb.utils.random;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import ru.enzhine.rnb.utils.ImmutablePair;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Random;
 
 public class BiasedRandomPickerTest {
@@ -13,11 +14,11 @@ public class BiasedRandomPickerTest {
     @Test
     public void pick_manyAttempts_closeToProbability() {
         int n = 100_000;
-        var picker = new BiasedRandomPicker<>(Map.of(
-                5, 0,
-                15, 1,
-                50, 2,
-                30, 3
+        var picker = new BiasedRandomPicker<>(List.of(
+                ImmutablePair.of(5, 0),
+                ImmutablePair.of(15, 1),
+                ImmutablePair.of(50, 2),
+                ImmutablePair.of(30, 3)
         ));
 
         int count0 = 0;
@@ -27,7 +28,7 @@ public class BiasedRandomPickerTest {
         for (int i = 0; i < n; i++) {
             var value = picker.pick(r);
 
-            switch (value){
+            switch (value) {
                 case 0 -> ++count0;
                 case 1 -> ++count1;
                 case 2 -> ++count2;
@@ -39,9 +40,9 @@ public class BiasedRandomPickerTest {
         float proba1 = Math.round((float) count1 / n * 100) / 100f;
         float proba2 = Math.round((float) count2 / n * 100) / 100f;
         float proba3 = Math.round((float) count3 / n * 100) / 100f;
-        Assertions.assertEquals(proba0, 0.05f);
-        Assertions.assertEquals(proba1, 0.15f);
-        Assertions.assertEquals(proba2, 0.50f);
-        Assertions.assertEquals(proba3, 0.30f);
+        Assertions.assertEquals(0.05f, proba0);
+        Assertions.assertEquals(0.15f, proba1);
+        Assertions.assertEquals(0.5f, proba2);
+        Assertions.assertEquals(0.3f, proba3);
     }
 }

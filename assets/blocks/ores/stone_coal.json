@@ -1,0 +1,13 @@
+{
+  "type": "layered",
+  "layers": [
+    {
+      "type": "path",
+      "path": "blocks/stone.png"
+    },
+    {
+      "type": "path",
+      "path": "blocks/ores/coal_layer.png"
+    }
+  ]
+}

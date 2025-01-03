@@ -27,6 +27,7 @@ public class TextureUtils {
         }
         float n = texture.getWidth() * texture.getHeight();
         tempColor.set(r / n, g / n, b / n, a / n);
+        pixmap.dispose();
         return tempColor;
     }
 }

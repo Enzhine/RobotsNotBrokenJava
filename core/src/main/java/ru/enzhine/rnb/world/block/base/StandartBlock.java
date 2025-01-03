@@ -7,8 +7,10 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import ru.enzhine.rnb.render.SpriteRendering;
+import ru.enzhine.rnb.texture.Textures;
 import ru.enzhine.rnb.utils.MathUtils;
 import ru.enzhine.rnb.world.Location;
+import ru.enzhine.rnb.world.material.Material;
 
 public abstract class StandartBlock implements Block, SpriteRendering {
 
@@ -22,14 +24,17 @@ public abstract class StandartBlock implements Block, SpriteRendering {
     private final Location loc;
     private final BlockType type;
     private final BiomeType biomeType;
+    private final Material material;
+
     private final String spriteName;
     private final TextureRegion texture;
     private final Color outlineColor;
 
-    public StandartBlock(String sprite, Location loc, BlockType bt, BiomeType biomeType) {
+    public StandartBlock(String sprite, Location loc, BlockType bt, Material material, BiomeType biomeType) {
         this.loc = loc;
         this.type = bt;
         this.biomeType = biomeType;
+        this.material = material;
         var cache = Textures.getTexture(sprite);
         if (!validateTexture(cache.getOriginTexture())) {
             throw new RuntimeException(String.format("Texture ratios is not divisible by %d", TEXTURE_WH));
@@ -72,6 +77,10 @@ public abstract class StandartBlock implements Block, SpriteRendering {
                 TEXTURE_WH,
                 TEXTURE_WH
         );
+    }
+
+    public Material getMaterial() {
+        return this.material;
     }
 
     public Block atTop() {
@@ -120,18 +129,18 @@ public abstract class StandartBlock implements Block, SpriteRendering {
     public void shapeRender(ShapeRenderer renderer, Viewport viewport) {
         renderer.begin(ShapeRenderer.ShapeType.Filled);
         renderer.setColor(outlineColor);
-        var top = atTop();
-        if (top instanceof SpriteRendering && !((SpriteRendering) top).getSpriteName().equals(getSpriteName())) {
-            renderer.rectLine(
-                    this.loc.getBlockX() * TEXTURE_WH,
-                    (this.loc.getBlockY() + 1) * TEXTURE_WH,
-                    (this.loc.getBlockX() + 1) * TEXTURE_WH,
-                    (this.loc.getBlockY() + 1) * TEXTURE_WH,
-                    2f
-            );
-        }
+//        var top = atTop();
+//        if (top != null && top.getMaterial() != getMaterial()) {
+//            renderer.rectLine(
+//                    this.loc.getBlockX() * TEXTURE_WH,
+//                    (this.loc.getBlockY() + 1) * TEXTURE_WH,
+//                    (this.loc.getBlockX() + 1) * TEXTURE_WH,
+//                    (this.loc.getBlockY() + 1) * TEXTURE_WH,
+//                    2f
+//            );
+//        }
         var bottom = atBottom();
-        if (bottom instanceof SpriteRendering && !((SpriteRendering) bottom).getSpriteName().equals(getSpriteName())) {
+        if (bottom != null && bottom.getMaterial() != getMaterial()) {
             renderer.rectLine(
                     this.loc.getBlockX() * TEXTURE_WH,
                     this.loc.getBlockY() * TEXTURE_WH,
@@ -141,7 +150,7 @@ public abstract class StandartBlock implements Block, SpriteRendering {
             );
         }
         var left = atLeft();
-        if (left instanceof SpriteRendering && !((SpriteRendering) left).getSpriteName().equals(getSpriteName())) {
+        if (left != null && left.getMaterial() != getMaterial()) {
             renderer.rectLine(
                     this.loc.getBlockX() * TEXTURE_WH,
                     this.loc.getBlockY() * TEXTURE_WH,
@@ -150,16 +159,16 @@ public abstract class StandartBlock implements Block, SpriteRendering {
                     2f
             );
         }
-        var right = atRight();
-        if (right instanceof SpriteRendering && !((SpriteRendering) right).getSpriteName().equals(getSpriteName())) {
-            renderer.rectLine(
-                    (this.loc.getBlockX() + 1) * TEXTURE_WH,
-                    this.loc.getBlockY() * TEXTURE_WH,
-                    (this.loc.getBlockX() + 1) * TEXTURE_WH,
-                    (this.loc.getBlockY() + 1) * TEXTURE_WH,
-                    2f
-            );
-        }
+//        var right = atRight();
+//        if (right != null && right.getMaterial() != getMaterial()) {
+//            renderer.rectLine(
+//                    (this.loc.getBlockX() + 1) * TEXTURE_WH,
+//                    this.loc.getBlockY() * TEXTURE_WH,
+//                    (this.loc.getBlockX() + 1) * TEXTURE_WH,
+//                    (this.loc.getBlockY() + 1) * TEXTURE_WH,
+//                    2f
+//            );
+//        }
         renderer.end();
     }
 }
