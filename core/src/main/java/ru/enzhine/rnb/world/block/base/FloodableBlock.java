@@ -1,31 +1,41 @@
 package ru.enzhine.rnb.world.block.base;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import ru.enzhine.rnb.texture.TextureCache;
 import ru.enzhine.rnb.texture.Textures;
+import ru.enzhine.rnb.texture.render.TextureRenderer;
+import ru.enzhine.rnb.texture.render.RenderingContext;
 import ru.enzhine.rnb.world.Fluid;
 import ru.enzhine.rnb.world.Location;
 import ru.enzhine.rnb.world.Material;
 
 public abstract class FloodableBlock extends TransparentBlock implements Floodable, Ticking {
 
+    private static TextureRenderer[] fluidRenderers;
+    private static RenderingContext[] fluidRendererContexts;
+
+    static {
+        Fluid[] globalFluids = Fluid.values();
+        fluidRenderers = new TextureRenderer[globalFluids.length];
+        fluidRendererContexts = new RenderingContext[globalFluids.length];
+
+        for (Fluid fluid : globalFluids) {
+            var fluidRenderer = Textures.getFluidTextureRenderer(fluid);
+            fluidRenderers[fluid.getId()] = fluidRenderer;
+            fluidRendererContexts[fluid.getId()] = fluidRenderer.newContext();
+        }
+    }
+
     private final byte[] fluids;
     private boolean isStill;
     private byte totalFluid;
 
     public FloodableBlock(String sprite, String spriteBG, Location loc, BlockType bt, Material material, BiomeType biomeType) {
-        this(Textures.getTexture(sprite), Textures.getTexture(spriteBG), loc, bt, material, biomeType);
+        this(Textures.getTextureRenderer(sprite), Textures.getTextureRenderer(spriteBG), loc, bt, material, biomeType);
     }
 
-    public FloodableBlock(TextureCache textureCache, TextureCache textureBGCache, Location loc, BlockType bt, Material material, BiomeType biomeType) {
-        this(textureCache.getOriginTexture(), textureBGCache.getOriginTexture(), textureCache.getOutlineColor(), loc, bt, material, biomeType);
-    }
-
-    public FloodableBlock(Texture blockTexture, Texture blockBGTexture, Color blockOutlineColor, Location loc, BlockType bt, Material material, BiomeType biomeType) {
-        super(blockTexture, blockBGTexture, blockOutlineColor, loc, bt, material, biomeType);
+    public FloodableBlock(TextureRenderer textureRenderer, TextureRenderer textureBGRenderer, Location loc, BlockType bt, Material material, BiomeType biomeType) {
+        super(textureRenderer, textureBGRenderer, loc, bt, material, biomeType);
 
         this.fluids = new byte[Fluid.values().length];
         this.totalFluid = 0;
@@ -76,9 +86,12 @@ public abstract class FloodableBlock extends TransparentBlock implements Floodab
             if (lvl == 0) {
                 continue;
             }
-            Texture tex = Textures.getFluidTexture(Fluid.getById(i)).getOriginTexture();
-            batch.draw(
-                    tex,
+            var fluidRenderer = fluidRenderers[i];
+            var fluidContext = fluidRendererContexts[i];
+
+            fluidRenderer.render(
+                    fluidContext,
+                    batch,
                     loc.getBlockX() * TEXTURE_WH,
                     loc.getBlockY() * TEXTURE_WH + startingLevel,
                     0,

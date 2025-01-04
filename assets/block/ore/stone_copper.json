@@ -1,13 +1,16 @@
 {
-  "type": "layered",
-  "layers": [
-    {
-      "type": "path",
-      "path": "block/stone.png"
-    },
-    {
-      "type": "path",
-      "path": "block/ore/copper_layer.png"
-    }
-  ]
+  "type": "static",
+  "src": {
+    "type": "layered",
+    "layers": [
+      {
+        "type": "path",
+        "path": "block/stone.png"
+      },
+      {
+        "type": "path",
+        "path": "block/ore/copper_layer.png"
+      }
+    ]
+  }
 }

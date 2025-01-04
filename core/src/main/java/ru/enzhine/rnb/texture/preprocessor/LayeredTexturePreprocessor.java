@@ -1,28 +1,26 @@
-package ru.enzhine.rnb.texture.processor;
+package ru.enzhine.rnb.texture.preprocessor;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.extern.jackson.Jacksonized;
+import ru.enzhine.rnb.texture.exception.TexturePreprocessorException;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Setter
-@Getter
-public class LayeredTextureProcessor implements TextureProcessor {
+@Builder
+@Jacksonized
+public class LayeredTexturePreprocessor implements TexturePreprocessor {
 
-    private TextureProcessor[] layers;
+    @NonNull
+    private final TexturePreprocessor[] layers;
 
     @Override
     public Texture process() {
         if (layers.length == 0) {
-            throw new RuntimeException("Layers can not be empty");
+            throw new TexturePreprocessorException("Layers can not be empty");
         }
         Pixmap basePixmap = null;
 
-        for (TextureProcessor layer : layers) {
+        for (TexturePreprocessor layer : layers) {
             var texture = layer.process();
             texture.getTextureData().prepare();
 

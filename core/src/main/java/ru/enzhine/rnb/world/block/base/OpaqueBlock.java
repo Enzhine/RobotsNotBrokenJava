@@ -1,13 +1,11 @@
 package ru.enzhine.rnb.world.block.base;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import ru.enzhine.rnb.render.Rendering;
-import ru.enzhine.rnb.texture.TextureCache;
 import ru.enzhine.rnb.texture.Textures;
+import ru.enzhine.rnb.texture.render.TextureRenderer;
+import ru.enzhine.rnb.texture.render.RenderingContext;
 import ru.enzhine.rnb.world.Location;
 import ru.enzhine.rnb.world.Material;
 
@@ -20,24 +18,21 @@ public abstract class OpaqueBlock implements Block, Rendering {
     protected final BiomeType biomeType;
     protected final Material material;
 
-    protected final Texture blockTexture;
-    protected final Color outlineColor;
+    protected final TextureRenderer<RenderingContext> renderer;
+    protected final RenderingContext rendererContext;
 
     public OpaqueBlock(String sprite, Location loc, BlockType bt, Material material, BiomeType biomeType) {
-        this(Textures.getTexture(sprite), loc, bt, material, biomeType);
+        this(Textures.getTextureRenderer(sprite), loc, bt, material, biomeType);
     }
 
-    public OpaqueBlock(TextureCache textureCache, Location loc, BlockType bt, Material material, BiomeType biomeType) {
-        this(textureCache.getOriginTexture(), textureCache.getOutlineColor(), loc, bt, material, biomeType);
-    }
-
-    public OpaqueBlock(Texture blockTexture, Color blockOutlineColor, Location loc, BlockType bt, Material material, BiomeType biomeType) {
+    public OpaqueBlock(TextureRenderer<RenderingContext> textureRenderer, Location loc, BlockType bt, Material material, BiomeType biomeType) {
         this.loc = loc;
         this.type = bt;
         this.biomeType = biomeType;
         this.material = material;
-        this.blockTexture = blockTexture;
-        this.outlineColor = blockOutlineColor;
+
+        this.renderer = textureRenderer;
+        this.rendererContext = this.renderer.newContext();
     }
 
     @Override
@@ -91,14 +86,11 @@ public abstract class OpaqueBlock implements Block, Rendering {
             return;
         }
 
-        batch.draw(
-                blockTexture,
-                loc.getBlockX() * TEXTURE_WH,
-                loc.getBlockY() * TEXTURE_WH,
-                loc.getBlockX().intValue() * TEXTURE_WH,
-                -loc.getBlockY().intValue() * TEXTURE_WH,
-                TEXTURE_WH,
-                TEXTURE_WH);
+        float x = loc.getBlockX() * TEXTURE_WH;
+        float y = loc.getBlockY() * TEXTURE_WH;
+        int srcX = loc.getBlockX().intValue() * TEXTURE_WH;
+        int srcY = -loc.getBlockY().intValue() * TEXTURE_WH;
+        renderer.render(this.rendererContext, batch, x, y, srcX, srcY, TEXTURE_WH, TEXTURE_WH);
     }
 
     public boolean shouldRenderOutline() {
@@ -108,6 +100,11 @@ public abstract class OpaqueBlock implements Block, Rendering {
     @Override
     public void shapeRender(ShapeRenderer renderer, Viewport viewport) {
         if (!shouldRenderOutline()) {
+            return;
+        }
+
+        var outlineColor = this.renderer.getOutlineColor(this.rendererContext);
+        if (outlineColor == null) {
             return;
         }
 

@@ -10,10 +10,14 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import lombok.Getter;
 import ru.enzhine.rnb.world.Fluid;
 import ru.enzhine.rnb.world.Location;
 import ru.enzhine.rnb.world.WorldImpl;
 import ru.enzhine.rnb.world.block.base.*;
+
+import java.time.Duration;
+import java.time.Instant;
 
 import static ru.enzhine.rnb.world.block.base.OpaqueBlock.TEXTURE_WH;
 
@@ -151,16 +155,8 @@ public class Main extends ApplicationAdapter {
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
             var proj = getCurrentPos();
             var loc = new Location((double) proj.x / TEXTURE_WH, (double) proj.y / TEXTURE_WH, w.getChunk(0L, 0L, false));
-            Block b = w.getBlock(loc.getBlockX(), loc.getBlockY(), false);
-            if (b == null) {
-                return;
-            }
-            if (b.getType() != BlockType.AIR) {
-                w.setBlock(BlockType.AIR, loc.getBlockX(), loc.getBlockY());
-            } else {
-                Floodable f = (Floodable) b;
-                f.setLevel(Fluid.WATER, (byte) 16);
-            }
+//            Block b = w.getBlock(loc.getBlockX(), loc.getBlockY(), false);
+            w.setBlock(BlockType.AIR, loc.getBlockX(), loc.getBlockY());
         }
     }
 
@@ -173,7 +169,7 @@ public class Main extends ApplicationAdapter {
                 return;
             }
             if (b instanceof Ticking) {
-                ((Ticking)b).onTick();
+                ((Ticking) b).onTick();
             }
         }
     }
@@ -186,6 +182,10 @@ public class Main extends ApplicationAdapter {
         }
         lastPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
     }
+
+    private static Instant last = Instant.now();
+    @Getter
+    private static float deltaTime = 0f;
 
     @Override
     public void render() {
@@ -203,6 +203,10 @@ public class Main extends ApplicationAdapter {
         drawBlockInfo();
         drawFPS();
         w.onTick();
+
+        var toBe = Instant.now();
+        deltaTime = Duration.between(last, toBe).getNano() / 1e9f;
+        last = Instant.now();
     }
 
     @Override

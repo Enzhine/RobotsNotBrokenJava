@@ -1,13 +1,16 @@
 {
-  "type": "layered",
-  "layers": [
-    {
-      "type": "path",
-      "path": "block/soft_stone.png"
-    },
-    {
-      "type": "path",
-      "path": "block/ore/coal_layer.png"
-    }
-  ]
+  "type": "static",
+  "src": {
+    "type": "layered",
+    "layers": [
+      {
+        "type": "path",
+        "path": "block/soft_stone.png"
+      },
+      {
+        "type": "path",
+        "path": "block/ore/coal_layer.png"
+      }
+    ]
+  }
 }

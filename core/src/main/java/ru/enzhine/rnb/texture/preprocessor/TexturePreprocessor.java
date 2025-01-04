@@ -1,4 +1,4 @@
-package ru.enzhine.rnb.texture.processor;
+package ru.enzhine.rnb.texture.preprocessor;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -9,9 +9,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         property = "type"
 )
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = PathTextureProcessor.class, name = "path"),
-        @JsonSubTypes.Type(value = LayeredTextureProcessor.class, name = "layered")
+        @JsonSubTypes.Type(value = PathTexturePreprocessor.class, name = "path"),
+        @JsonSubTypes.Type(value = LayeredTexturePreprocessor.class, name = "layered")
 })
-public interface TextureProcessor {
+public interface TexturePreprocessor {
     Texture process();
 }

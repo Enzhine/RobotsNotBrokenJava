@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import ru.enzhine.rnb.render.Rendering;
+import ru.enzhine.rnb.world.block.base.Rendering;
 import ru.enzhine.rnb.utils.adt.Placeable2D;
 import ru.enzhine.rnb.world.block.base.Block;
 import ru.enzhine.rnb.world.block.base.Ticking;
