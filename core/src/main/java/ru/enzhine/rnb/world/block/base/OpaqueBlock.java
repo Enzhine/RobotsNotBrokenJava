@@ -8,10 +8,10 @@ import ru.enzhine.rnb.texture.render.TextureRenderer;
 import ru.enzhine.rnb.texture.render.RenderingContext;
 import ru.enzhine.rnb.world.Location;
 import ru.enzhine.rnb.world.Material;
+import ru.enzhine.rnb.world.WorldImpl;
+import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public abstract class OpaqueBlock implements Block, Rendering {
-
-    public static final int TEXTURE_WH = 16;
 
     protected final Location loc;
     protected final BlockType type;
@@ -19,7 +19,7 @@ public abstract class OpaqueBlock implements Block, Rendering {
     protected final Material material;
 
     protected final TextureRenderer<RenderingContext> renderer;
-    protected final RenderingContext rendererContext;
+    protected RenderingContext rendererContext;
 
     public OpaqueBlock(String sprite, Location loc, BlockType bt, Material material, BiomeType biomeType) {
         this(Textures.getTextureRenderer(sprite), loc, bt, material, biomeType);
@@ -80,25 +80,22 @@ public abstract class OpaqueBlock implements Block, Rendering {
         return true;
     }
 
-    @Override
-    public void batchRender(SpriteBatch batch, Viewport viewport) {
-        if (!shouldRenderBlockTexture()) {
-            return;
-        }
-
-        float x = loc.getBlockX() * TEXTURE_WH;
-        float y = loc.getBlockY() * TEXTURE_WH;
-        int srcX = loc.getBlockX().intValue() * TEXTURE_WH;
-        int srcY = -loc.getBlockY().intValue() * TEXTURE_WH;
-        renderer.render(this.rendererContext, batch, x, y, srcX, srcY, TEXTURE_WH, TEXTURE_WH);
-    }
-
     public boolean shouldRenderOutline() {
         return true;
     }
 
     @Override
-    public void shapeRender(ShapeRenderer renderer, Viewport viewport) {
+    public void batch(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
+        if (!shouldRenderBlockTexture()) {
+            return;
+        }
+
+        float x = loc.getBlockX() * WorldImpl.BLOCK_PIXEL_SIZE;
+        float y = loc.getBlockY() * WorldImpl.BLOCK_PIXEL_SIZE;
+        int srcX = loc.getBlockX().intValue() * WorldImpl.BLOCK_PIXEL_SIZE;
+        int srcY = -loc.getBlockY().intValue() * WorldImpl.BLOCK_PIXEL_SIZE;
+        renderer.render(this.rendererContext, batch, x, y, srcX, srcY, WorldImpl.BLOCK_PIXEL_SIZE, WorldImpl.BLOCK_PIXEL_SIZE);
+
         if (!shouldRenderOutline()) {
             return;
         }
@@ -108,28 +105,27 @@ public abstract class OpaqueBlock implements Block, Rendering {
             return;
         }
 
-        renderer.begin(ShapeRenderer.ShapeType.Filled);
-        renderer.setColor(outlineColor);
         var bottom = atBottom();
         if (bottom != null && bottom.getMaterial() != getMaterial()) {
-            renderer.rectLine(
-                    this.loc.getBlockX() * TEXTURE_WH,
-                    this.loc.getBlockY() * TEXTURE_WH,
-                    (this.loc.getBlockX() + 1) * TEXTURE_WH,
-                    this.loc.getBlockY() * TEXTURE_WH,
+            drawer.line(
+                    this.loc.getBlockX() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    this.loc.getBlockY() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    (this.loc.getBlockX() + 1) * WorldImpl.BLOCK_PIXEL_SIZE,
+                    this.loc.getBlockY() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    outlineColor,
                     2f
             );
         }
         var left = atLeft();
         if (left != null && left.getMaterial() != getMaterial()) {
-            renderer.rectLine(
-                    this.loc.getBlockX() * TEXTURE_WH,
-                    this.loc.getBlockY() * TEXTURE_WH,
-                    this.loc.getBlockX() * TEXTURE_WH,
-                    (this.loc.getBlockY() + 1) * TEXTURE_WH,
+            drawer.line(
+                    this.loc.getBlockX() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    this.loc.getBlockY() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    this.loc.getBlockX() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    (this.loc.getBlockY() + 1) * WorldImpl.BLOCK_PIXEL_SIZE,
+                    outlineColor,
                     2f
             );
         }
-        renderer.end();
     }
 }

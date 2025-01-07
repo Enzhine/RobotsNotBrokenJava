@@ -2,13 +2,13 @@ package ru.enzhine.rnb.world;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import ru.enzhine.rnb.world.block.base.Rendering;
 import ru.enzhine.rnb.utils.adt.Placeable2D;
 import ru.enzhine.rnb.world.block.base.Block;
 import ru.enzhine.rnb.world.block.base.Ticking;
-import ru.enzhine.rnb.world.entity.Entity;
+import ru.enzhine.rnb.world.entity.base.Entity;
+import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -26,7 +26,7 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
     final Block[] blockLayer;
     final byte[] lightLayer;
 
-    public ChunkImpl(World w, long cX, long cY){
+    public ChunkImpl(World w, long cX, long cY) {
         this.chunkX = cX;
         this.chunkY = cY;
         this.chunkSize = w.chunkSize();
@@ -68,7 +68,7 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
 
     int globalToLocalXY(long xy) {
         int res = (int) (xy % chunkSize);
-        if(res < 0){
+        if (res < 0) {
             res += chunkSize;
         }
         return res;
@@ -90,7 +90,9 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
     }
 
     @Override
-    public Long getGlobalX() {return chunkX * chunkSize;}
+    public Long getGlobalX() {
+        return chunkX * chunkSize;
+    }
 
     @Override
     public Long getOffsetY() {
@@ -98,7 +100,9 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
     }
 
     @Override
-    public Long getGlobalY() {return chunkY * chunkSize;}
+    public Long getGlobalY() {
+        return chunkY * chunkSize;
+    }
 
     @Override
     public void set(Block b) {
@@ -111,7 +115,7 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
     public Block get(int localX, int localY) {
         try {
             return getBlockByLocal(localX, localY);
-        }catch (IndexOutOfBoundsException ex) {
+        } catch (IndexOutOfBoundsException ex) {
             return null;
         }
     }
@@ -119,6 +123,16 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
     @Override
     public byte getLightLevel(int localX, int localY) {
         return getLightByLocal(localX, localY);
+    }
+
+    @Override
+    public void addEntity(Entity e) {
+        this.entities.add(e);
+    }
+
+    @Override
+    public boolean removeEntity(Entity e) {
+        return this.entities.remove(e);
     }
 
     @Override
@@ -136,12 +150,12 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
         return this.world;
     }
 
-    float colorOfLevel(byte level){
+    float colorOfLevel(byte level) {
         return (float) level / MAX_LIGHT_LEVEL;
     }
 
     @Override
-    public void batchRender(SpriteBatch batch, Viewport viewport) {
+    public void batch(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
         for (int i = 0; i < blockLayer.length; i++) {
             Block b = blockLayer[i];
             float tint = colorOfLevel(lightLayer[i]);
@@ -149,19 +163,12 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
             if (b instanceof Rendering) {
                 Color prev = batch.getColor();
                 batch.setColor(tint, tint, tint, 1f);
-                ((Rendering) b).batchRender(batch, viewport);
+                ((Rendering) b).batch(batch, drawer, viewport);
                 batch.setColor(prev);
             }
         }
-    }
-
-    @Override
-    public void shapeRender(ShapeRenderer renderer, Viewport viewport) {
-        for (int i = 0; i < blockLayer.length; i++) {
-            Block b = blockLayer[i];
-            if (b instanceof Rendering) {
-                ((Rendering) b).shapeRender(renderer, viewport);
-            }
+        for (Entity e : entities) {
+            e.batch(batch, drawer, viewport);
         }
     }
 

@@ -12,9 +12,10 @@ public class AverageOutlineColor implements OutlineColorStrategy {
 
     @Builder.Default
     private final float tint = 0.65f;
+    private final float tintAlpha = 1f;
 
     @Override
     public Color getColor(Texture texture) {
-        return TextureUtils.getAverageColor(texture).mul(tint);
+        return TextureUtils.getAverageColor(texture).mul(tint, tint, tint, tintAlpha);
     }
 }

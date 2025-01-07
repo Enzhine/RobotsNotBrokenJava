@@ -1,8 +1,11 @@
 package ru.enzhine.rnb.world;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import ru.enzhine.rnb.utils.ImmutablePair;
 import ru.enzhine.rnb.utils.MathUtils;
 import ru.enzhine.rnb.world.block.base.BlockFactory;
 import ru.enzhine.rnb.world.block.base.BlockType;
@@ -12,7 +15,14 @@ import ru.enzhine.rnb.utils.adt.TreeMap2D;
 import ru.enzhine.rnb.world.block.base.BlockFactoryImpl;
 import ru.enzhine.rnb.world.block.base.BiomeType;
 import ru.enzhine.rnb.world.block.base.Block;
+import ru.enzhine.rnb.world.entity.base.Entity;
+import ru.enzhine.rnb.world.entity.base.EntityFactory;
+import ru.enzhine.rnb.world.entity.base.EntityFactoryImpl;
+import ru.enzhine.rnb.world.entity.base.EntityType;
 import ru.enzhine.rnb.world.gen.*;
+import space.earlygrey.shapedrawer.ShapeDrawer;
+
+import java.awt.*;
 
 public class WorldImpl implements World, Rendering {
 
@@ -21,12 +31,14 @@ public class WorldImpl implements World, Rendering {
     private final Map2D<ChunkImpl> gameMap;
     private final ChunkGenerator chunkGen;
     private final BlockFactory blockFactory;
+    private final EntityFactory entityFactory;
 
     public WorldImpl(int chunkSize, long seed, float biomesPerChunk, float gapProbability) {
         this.chunkSize = chunkSize;
         this.seed = seed;
         this.gameMap = new TreeMap2D<>();
         this.blockFactory = new BlockFactoryImpl();
+        this.entityFactory = new EntityFactoryImpl();
         this.chunkGen = new LazyDeterminedVoronoiChunkGenerator(
                 this,
                 new WorldBiomeFactoryImpl(),
@@ -46,6 +58,14 @@ public class WorldImpl implements World, Rendering {
 
     public int chunkLocal(long xy) {
         return MathUtils.remainder(xy, chunkSize);
+    }
+
+    @Override
+    public Entity summonEntity(EntityType type, double x, double y) {
+        Chunk c = getChunk((long) x, (long) y, true);
+        Entity e = this.entityFactory.makeEntity(type, x, y, c);
+        c.addEntity(e);
+        return e;
     }
 
     @Override
@@ -94,31 +114,33 @@ public class WorldImpl implements World, Rendering {
         return chunkSize;
     }
 
-    @Override
-    public void batchRender(SpriteBatch batch, Viewport viewport) {
-        long x = (long) viewport.getCamera().position.x;
-        long y = (long) viewport.getCamera().position.y;
-        long xMin = (x - (long) viewport.getWorldWidth() / 2) / BLOCK_PIXEL_SIZE / chunkSize - 1;
-        long xMax = (x + (long) viewport.getWorldWidth() / 2) / BLOCK_PIXEL_SIZE / chunkSize + 1;
-        long yMin = (y - (long) viewport.getWorldHeight() / 2) / BLOCK_PIXEL_SIZE / chunkSize - 1;
-        long yMax = (y + (long) viewport.getWorldHeight() / 2) / BLOCK_PIXEL_SIZE / chunkSize + 1;
+    private ImmutablePair<Long, Long> getTopLeftWorldChunkCoords(Viewport viewport, ShapeDrawer drawer) {
+        var camera = (OrthographicCamera) viewport.getCamera();
+        var proj = camera.unproject(new Vector3(-1f, -1f, 0));
 
-        for (ChunkImpl chunk : gameMap.withinBounds(xMin, xMax, yMin, yMax)) {
-            chunk.batchRender(batch, viewport);
-        }
+        var blockX = MathUtils.blockPos(proj.x / BLOCK_PIXEL_SIZE);
+        var blockY = MathUtils.blockPos(proj.y / BLOCK_PIXEL_SIZE);
+
+        return ImmutablePair.of(chunkOffset(blockX), chunkOffset(blockY));
+    }
+
+    private ImmutablePair<Long, Long> getBottomRightWorldChunkCoords(Viewport viewport, ShapeDrawer drawer) {
+        var camera = (OrthographicCamera) viewport.getCamera();
+        var proj = camera.unproject(new Vector3(viewport.getScreenWidth(), viewport.getScreenHeight(), 0));
+
+        var blockX = MathUtils.blockPos(proj.x / BLOCK_PIXEL_SIZE);
+        var blockY = MathUtils.blockPos(proj.y / BLOCK_PIXEL_SIZE);
+
+        return ImmutablePair.of(chunkOffset(blockX), chunkOffset(blockY));
     }
 
     @Override
-    public void shapeRender(ShapeRenderer renderer, Viewport viewport) {
-        long x = (long) viewport.getCamera().position.x;
-        long y = (long) viewport.getCamera().position.y;
-        long xMin = (x - (long) viewport.getWorldWidth() / 2) / BLOCK_PIXEL_SIZE / chunkSize - 1;
-        long xMax = (x + (long) viewport.getWorldWidth() / 2) / BLOCK_PIXEL_SIZE / chunkSize + 1;
-        long yMin = (y - (long) viewport.getWorldHeight() / 2) / BLOCK_PIXEL_SIZE / chunkSize - 1;
-        long yMax = (y + (long) viewport.getWorldHeight() / 2) / BLOCK_PIXEL_SIZE / chunkSize + 1;
+    public void batch(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
+        var topLeft = getTopLeftWorldChunkCoords(viewport, drawer);
+        var bottomRight = getBottomRightWorldChunkCoords(viewport, drawer);
 
-        for (ChunkImpl chunk : gameMap.withinBounds(xMin, xMax, yMin, yMax)) {
-            chunk.shapeRender(renderer, viewport);
+        for (ChunkImpl chunk : gameMap.withinBounds(topLeft.getLeft(), bottomRight.getLeft(), bottomRight.getRight(), topLeft.getRight())) {
+            chunk.batch(batch, drawer, viewport);
         }
     }
 

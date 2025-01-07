@@ -5,8 +5,11 @@ eclipse.project.name = appName + "-core"
 
 dependencies {
     implementation 'org.junit.jupiter:junit-jupiter:5.11.0-M1'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.0.1'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.4.2'
+    implementation "space.earlygrey:shapedrawer:$shapedrawerVersion"
 
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
+
+    implementation group: 'org.openjdk.nashorn', name: 'nashorn-core', version: '15.6'
 }

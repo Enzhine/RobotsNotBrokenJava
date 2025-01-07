@@ -4,39 +4,67 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import lombok.Getter;
-import ru.enzhine.rnb.world.Fluid;
+import org.openjdk.nashorn.api.scripting.NashornScriptEngine;
+import org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory;
+import ru.enzhine.rnb.editor.CodeEditor;
+import ru.enzhine.rnb.editor.CodeEditorInputProcessor;
 import ru.enzhine.rnb.world.Location;
 import ru.enzhine.rnb.world.WorldImpl;
 import ru.enzhine.rnb.world.block.base.*;
+import ru.enzhine.rnb.world.entity.Robot;
+import ru.enzhine.rnb.world.entity.base.EntityType;
+import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import java.time.Duration;
 import java.time.Instant;
 
-import static ru.enzhine.rnb.world.block.base.OpaqueBlock.TEXTURE_WH;
-
 public class Main extends ApplicationAdapter {
     SpriteBatch batch;
-    ShapeRenderer shapeRenderer;
+    ShapeDrawer drawer;
+    Texture singleColorTexture;
     ExtendViewport ev;
     WorldImpl w;
+    Robot r;
+    CodeEditor ce;
+    BitmapFont font;
 
     @Override
     public void create() {
+        ce = new CodeEditor(0, 0);
         w = new WorldImpl(10, 43, 0.2f, 0.2f);
         ev = new ExtendViewport(32 * WorldImpl.BLOCK_PIXEL_SIZE, 32 * WorldImpl.BLOCK_PIXEL_SIZE);
         long radius = 10;
         w.genRangeChunks(-(2 * radius), 2 * radius, -radius, radius);
-//        w.genRangeChunks(-1L, 0L, -1L, 0L);
+        w.setBlock(BlockType.AIR, 4L, 4L);
+        w.setBlock(BlockType.AIR, 5L, 4L);
+        w.setBlock(BlockType.AIR, 4L, 5L);
+        w.setBlock(BlockType.AIR, 5L, 5L);
+        this.r = (Robot) w.summonEntity(EntityType.ROBOT, 5d, 4d);
+        NashornScriptEngineFactory sefactory = new NashornScriptEngineFactory();
+        NashornScriptEngine engine = (NashornScriptEngine) sefactory.getScriptEngine(cName -> cName.startsWith("java.util"));
+//        NashornScriptEngine engine = (NashornScriptEngine) sefactory.getScriptEngine(new String[]{}, this.getClass().getClassLoader(), cName -> true);
+        engine.put("robot", this.r);
 
+        Gdx.input.setInputProcessor(new CodeEditorInputProcessor(ce, engine));
+
+        font = new BitmapFont();
         batch = new SpriteBatch();
-        shapeRenderer = new ShapeRenderer();
+        batch.setColor(Color.WHITE);
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGB888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.drawPixel(0, 0);
+        this.singleColorTexture = new Texture(pixmap);
+        this.drawer = new ShapeDrawer(this.batch, new TextureRegion(this.singleColorTexture, 0, 0, 1, 1));
+        pixmap.dispose();
     }
 
     @Override
@@ -51,102 +79,98 @@ public class Main extends ApplicationAdapter {
 
     private void drawBlockInfo() {
         var proj = getCurrentPos();
-        var font = new BitmapFont();
-        var loc = new Location((double) proj.x / TEXTURE_WH, (double) proj.y / TEXTURE_WH, w.getChunk(0L, 0L, false));
+        var loc = new Location((double) proj.x / WorldImpl.BLOCK_PIXEL_SIZE, (double) proj.y / WorldImpl.BLOCK_PIXEL_SIZE, w.getChunk(0L, 0L, false));
         var chunk = w.getChunk(loc.getBlockX(), loc.getBlockY(), false);
         var block = (OpaqueBlock) w.getBlock(loc.getBlockX(), loc.getBlockY(), false);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(Color.RED);
         if (chunk != null) {
-            shapeRenderer.rectLine(
-                    chunk.getOffsetX() * w.chunkSize() * TEXTURE_WH,
-                    (chunk.getOffsetY() + 1) * w.chunkSize() * TEXTURE_WH,
-                    (chunk.getOffsetX() + 1) * w.chunkSize() * TEXTURE_WH,
-                    (chunk.getOffsetY() + 1) * w.chunkSize() * TEXTURE_WH,
+            drawer.line(
+                    chunk.getOffsetX() * w.chunkSize() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    (chunk.getOffsetY() + 1) * w.chunkSize() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    (chunk.getOffsetX() + 1) * w.chunkSize() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    (chunk.getOffsetY() + 1) * w.chunkSize() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    Color.RED,
                     2f
             );
-            shapeRenderer.rectLine(
-                    chunk.getOffsetX() * w.chunkSize() * TEXTURE_WH,
-                    chunk.getOffsetY() * w.chunkSize() * TEXTURE_WH,
-                    (chunk.getOffsetX() + 1) * w.chunkSize() * TEXTURE_WH,
-                    chunk.getOffsetY() * w.chunkSize() * TEXTURE_WH,
+            drawer.line(
+                    chunk.getOffsetX() * w.chunkSize() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    chunk.getOffsetY() * w.chunkSize() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    (chunk.getOffsetX() + 1) * w.chunkSize() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    chunk.getOffsetY() * w.chunkSize() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    Color.RED,
                     2f
             );
-            shapeRenderer.rectLine(
-                    chunk.getOffsetX() * w.chunkSize() * TEXTURE_WH,
-                    chunk.getOffsetY() * w.chunkSize() * TEXTURE_WH,
-                    chunk.getOffsetX() * w.chunkSize() * TEXTURE_WH,
-                    (chunk.getOffsetY() + 1) * w.chunkSize() * TEXTURE_WH,
+            drawer.line(
+                    chunk.getOffsetX() * w.chunkSize() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    chunk.getOffsetY() * w.chunkSize() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    chunk.getOffsetX() * w.chunkSize() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    (chunk.getOffsetY() + 1) * w.chunkSize() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    Color.RED,
                     2f
             );
-            shapeRenderer.rectLine(
-                    (chunk.getOffsetX() + 1) * w.chunkSize() * TEXTURE_WH,
-                    chunk.getOffsetY() * w.chunkSize() * TEXTURE_WH,
-                    (chunk.getOffsetX() + 1) * w.chunkSize() * TEXTURE_WH,
-                    (chunk.getOffsetY() + 1) * w.chunkSize() * TEXTURE_WH,
+            drawer.line(
+                    (chunk.getOffsetX() + 1) * w.chunkSize() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    chunk.getOffsetY() * w.chunkSize() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    (chunk.getOffsetX() + 1) * w.chunkSize() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    (chunk.getOffsetY() + 1) * w.chunkSize() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    Color.RED,
                     2f
             );
         }
-        shapeRenderer.end();
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(Color.WHITE);
-        shapeRenderer.line(
-                loc.getBlockX() * TEXTURE_WH,
-                (loc.getBlockY() + 1) * TEXTURE_WH,
-                (loc.getBlockX() + 1) * TEXTURE_WH,
-                (loc.getBlockY() + 1) * TEXTURE_WH
+        drawer.line(
+                loc.getBlockX() * WorldImpl.BLOCK_PIXEL_SIZE,
+                (loc.getBlockY() + 1) * WorldImpl.BLOCK_PIXEL_SIZE,
+                (loc.getBlockX() + 1) * WorldImpl.BLOCK_PIXEL_SIZE,
+                (loc.getBlockY() + 1) * WorldImpl.BLOCK_PIXEL_SIZE,
+                Color.WHITE
         );
-        shapeRenderer.line(
-                loc.getBlockX() * TEXTURE_WH,
-                loc.getBlockY() * TEXTURE_WH,
-                (loc.getBlockX() + 1) * TEXTURE_WH,
-                loc.getBlockY() * TEXTURE_WH
+        drawer.line(
+                loc.getBlockX() * WorldImpl.BLOCK_PIXEL_SIZE,
+                loc.getBlockY() * WorldImpl.BLOCK_PIXEL_SIZE,
+                (loc.getBlockX() + 1) * WorldImpl.BLOCK_PIXEL_SIZE,
+                loc.getBlockY() * WorldImpl.BLOCK_PIXEL_SIZE,
+                Color.WHITE
         );
-        shapeRenderer.line(
-                loc.getBlockX() * TEXTURE_WH,
-                loc.getBlockY() * TEXTURE_WH,
-                loc.getBlockX() * TEXTURE_WH,
-                (loc.getBlockY() + 1) * TEXTURE_WH
+        drawer.line(
+                loc.getBlockX() * WorldImpl.BLOCK_PIXEL_SIZE,
+                loc.getBlockY() * WorldImpl.BLOCK_PIXEL_SIZE,
+                loc.getBlockX() * WorldImpl.BLOCK_PIXEL_SIZE,
+                (loc.getBlockY() + 1) * WorldImpl.BLOCK_PIXEL_SIZE,
+                Color.WHITE
         );
-        shapeRenderer.line(
-                (loc.getBlockX() + 1) * TEXTURE_WH,
-                loc.getBlockY() * TEXTURE_WH,
-                (loc.getBlockX() + 1) * TEXTURE_WH,
-                (loc.getBlockY() + 1) * TEXTURE_WH
+        drawer.line(
+                (loc.getBlockX() + 1) * WorldImpl.BLOCK_PIXEL_SIZE,
+                loc.getBlockY() * WorldImpl.BLOCK_PIXEL_SIZE,
+                (loc.getBlockX() + 1) * WorldImpl.BLOCK_PIXEL_SIZE,
+                (loc.getBlockY() + 1) * WorldImpl.BLOCK_PIXEL_SIZE,
+                Color.WHITE
         );
-        shapeRenderer.end();
-        batch.begin();
         if (chunk != null) {
             font.draw(
                     batch,
                     String.format("G(%d;%d) L(%d;%d)", loc.getBlockX(), loc.getBlockY(), loc.getChunkLocalX(), loc.getChunkLocalY()),
-                    loc.getBlockX() * TEXTURE_WH,
-                    (loc.getBlockY() - 1) * TEXTURE_WH
+                    loc.getBlockX() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    (loc.getBlockY() - 1) * WorldImpl.BLOCK_PIXEL_SIZE
             );
             font.draw(
                     batch,
                     block.getType().toString(),
-                    loc.getBlockX() * TEXTURE_WH,
-                    loc.getBlockY() * TEXTURE_WH
+                    loc.getBlockX() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    loc.getBlockY() * WorldImpl.BLOCK_PIXEL_SIZE
             );
             font.draw(
                     batch,
                     String.format("C(%d;%d) " + block.getBiome(), chunk.getOffsetX(), chunk.getOffsetY()),
-                    loc.getBlockX() * TEXTURE_WH,
-                    (loc.getBlockY() - 2) * TEXTURE_WH
+                    loc.getBlockX() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    (loc.getBlockY() - 2) * WorldImpl.BLOCK_PIXEL_SIZE
             );
         }
-        batch.end();
-        font.dispose();
     }
 
     private void drawFPS() {
-        var font = new BitmapFont();
         batch.begin();
         var proj = ev.getCamera().unproject(new Vector3(1, 1, 0));
         font.draw(batch, "FPS " + Gdx.graphics.getFramesPerSecond(), proj.x, proj.y);
         batch.end();
-        font.dispose();
     }
 
     private final Vector3 lastPos = new Vector3(0, 0, 0);
@@ -154,7 +178,7 @@ public class Main extends ApplicationAdapter {
     private void trySetAir() {
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
             var proj = getCurrentPos();
-            var loc = new Location((double) proj.x / TEXTURE_WH, (double) proj.y / TEXTURE_WH, w.getChunk(0L, 0L, false));
+            var loc = new Location((double) proj.x / WorldImpl.BLOCK_PIXEL_SIZE, (double) proj.y / WorldImpl.BLOCK_PIXEL_SIZE, w.getChunk(0L, 0L, false));
 //            Block b = w.getBlock(loc.getBlockX(), loc.getBlockY(), false);
             w.setBlock(BlockType.AIR, loc.getBlockX(), loc.getBlockY());
         }
@@ -163,7 +187,7 @@ public class Main extends ApplicationAdapter {
     private void tryTick() {
         if (Gdx.input.isButtonJustPressed(Input.Buttons.MIDDLE)) {
             var proj = getCurrentPos();
-            var loc = new Location((double) proj.x / TEXTURE_WH, (double) proj.y / TEXTURE_WH, w.getChunk(0L, 0L, false));
+            var loc = new Location((double) proj.x / WorldImpl.BLOCK_PIXEL_SIZE, (double) proj.y / WorldImpl.BLOCK_PIXEL_SIZE, w.getChunk(0L, 0L, false));
             Block b = w.getBlock(loc.getBlockX(), loc.getBlockY(), false);
             if (b == null) {
                 return;
@@ -196,22 +220,22 @@ public class Main extends ApplicationAdapter {
         ev.apply();
         batch.setProjectionMatrix(ev.getCamera().combined);
         batch.begin();
-        w.batchRender(batch, ev);
-        batch.end();
-        shapeRenderer.setProjectionMatrix(ev.getCamera().combined);
-        w.shapeRender(shapeRenderer, ev);
+        w.batch(batch, drawer, ev);
         drawBlockInfo();
+        batch.end();
         drawFPS();
         w.onTick();
 
         var toBe = Instant.now();
         deltaTime = Duration.between(last, toBe).getNano() / 1e9f;
         last = Instant.now();
+        ce.render(batch);
     }
 
     @Override
     public void dispose() {
+        ce.dispose();
         batch.dispose();
-        shapeRenderer.dispose();
+        font.dispose();
     }
 }

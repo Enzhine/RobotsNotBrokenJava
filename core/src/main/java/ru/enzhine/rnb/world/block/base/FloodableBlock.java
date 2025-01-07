@@ -8,11 +8,13 @@ import ru.enzhine.rnb.texture.render.RenderingContext;
 import ru.enzhine.rnb.world.Fluid;
 import ru.enzhine.rnb.world.Location;
 import ru.enzhine.rnb.world.Material;
+import ru.enzhine.rnb.world.WorldImpl;
+import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public abstract class FloodableBlock extends TransparentBlock implements Floodable, Ticking {
 
-    private static TextureRenderer[] fluidRenderers;
-    private static RenderingContext[] fluidRendererContexts;
+    private static final TextureRenderer<RenderingContext>[] fluidRenderers;
+    private static final RenderingContext[] fluidRendererContexts;
 
     static {
         Fluid[] globalFluids = Fluid.values();
@@ -34,7 +36,7 @@ public abstract class FloodableBlock extends TransparentBlock implements Floodab
         this(Textures.getTextureRenderer(sprite), Textures.getTextureRenderer(spriteBG), loc, bt, material, biomeType);
     }
 
-    public FloodableBlock(TextureRenderer textureRenderer, TextureRenderer textureBGRenderer, Location loc, BlockType bt, Material material, BiomeType biomeType) {
+    public FloodableBlock(TextureRenderer<RenderingContext> textureRenderer, TextureRenderer<RenderingContext> textureBGRenderer, Location loc, BlockType bt, Material material, BiomeType biomeType) {
         super(textureRenderer, textureBGRenderer, loc, bt, material, biomeType);
 
         this.fluids = new byte[Fluid.values().length];
@@ -74,8 +76,8 @@ public abstract class FloodableBlock extends TransparentBlock implements Floodab
     }
 
     @Override
-    public void batchRender(SpriteBatch batch, Viewport viewport) {
-        super.batchRender(batch, viewport);
+    public void batch(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
+        super.batch(batch, drawer, viewport);
 
         if (totalFluid == 0) {
             return;
@@ -92,11 +94,11 @@ public abstract class FloodableBlock extends TransparentBlock implements Floodab
             fluidRenderer.render(
                     fluidContext,
                     batch,
-                    loc.getBlockX() * TEXTURE_WH,
-                    loc.getBlockY() * TEXTURE_WH + startingLevel,
+                    loc.getBlockX() * WorldImpl.BLOCK_PIXEL_SIZE,
+                    loc.getBlockY() * WorldImpl.BLOCK_PIXEL_SIZE + startingLevel,
                     0,
                     0,
-                    TEXTURE_WH,
+                    WorldImpl.BLOCK_PIXEL_SIZE,
                     lvl);
             startingLevel += lvl;
         }

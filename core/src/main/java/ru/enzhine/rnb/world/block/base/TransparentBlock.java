@@ -7,6 +7,8 @@ import ru.enzhine.rnb.texture.render.TextureRenderer;
 import ru.enzhine.rnb.texture.render.RenderingContext;
 import ru.enzhine.rnb.world.Location;
 import ru.enzhine.rnb.world.Material;
+import ru.enzhine.rnb.world.WorldImpl;
+import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public abstract class TransparentBlock extends OpaqueBlock {
 
@@ -30,17 +32,17 @@ public abstract class TransparentBlock extends OpaqueBlock {
     }
 
     @Override
-    public void batchRender(SpriteBatch batch, Viewport viewport) {
+    public void batch(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
         if (shouldRenderBG()) {
-            float x = loc.getBlockX() * TEXTURE_WH;
-            float y = loc.getBlockY() * TEXTURE_WH;
+            float x = loc.getBlockX() * WorldImpl.BLOCK_PIXEL_SIZE;
+            float y = loc.getBlockY() * WorldImpl.BLOCK_PIXEL_SIZE;
             int offsetX = (int) (viewport.getCamera().position.x * BG_SPEED);
             int offsetY = (int) (viewport.getCamera().position.y * BG_SPEED);
-            int srcX = loc.getBlockX().intValue() * TEXTURE_WH + offsetX;
-            int srcY = -loc.getBlockY().intValue() * TEXTURE_WH - offsetY;
-            bgRenderer.render(bgRendererContext, batch, x, y, srcX, srcY, TEXTURE_WH, TEXTURE_WH);
+            int srcX = loc.getBlockX().intValue() * WorldImpl.BLOCK_PIXEL_SIZE + offsetX;
+            int srcY = -loc.getBlockY().intValue() * WorldImpl.BLOCK_PIXEL_SIZE - offsetY;
+            bgRenderer.render(bgRendererContext, batch, x, y, srcX, srcY, WorldImpl.BLOCK_PIXEL_SIZE, WorldImpl.BLOCK_PIXEL_SIZE);
         }
 
-        super.batchRender(batch, viewport);
+        super.batch(batch, drawer, viewport);
     }
 }

@@ -26,4 +26,20 @@ public class MathUtils {
     public static float lerp(float from, float to, float progress) {
         return from + (to - from) * progress;
     }
+
+    private static float easeOutCubic(float x) {
+        return 1 - (1 - x) * (1 - x) * (1 - x);
+    }
+
+    public static float cerp(float from, float to, float progress) {
+        return from + (to - from) * easeOutCubic(progress);
+    }
+
+    public static long blockPos(float x) {
+        if (x > 0) {
+            return (long) x;
+        } else {
+            return (long) Math.floor(x);
+        }
+    }
 }

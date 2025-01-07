@@ -1,5 +1,8 @@
 package ru.enzhine.rnb.world;
 
+import lombok.ToString;
+
+@ToString
 public class Location {
     private final Double x;
     private final Double y;

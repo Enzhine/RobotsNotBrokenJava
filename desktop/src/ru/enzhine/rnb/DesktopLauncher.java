@@ -10,6 +10,6 @@ public class DesktopLauncher {
 		config.setForegroundFPS(60);
 		config.setTitle("RobotsNotBroken");
 //		config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
-		new Lwjgl3Application(new Main(), config);
+		new Lwjgl3Application(new GameHolder(), config);
 	}
 }

@@ -2,7 +2,9 @@ package ru.enzhine.rnb.utils;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 
+@ToString
 @EqualsAndHashCode
 @Getter
 public class ImmutablePair<A, B> {
