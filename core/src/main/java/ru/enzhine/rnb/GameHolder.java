@@ -10,17 +10,20 @@ public class GameHolder extends ApplicationAdapter {
 
     private SpriteBatch batch;
     private WorldStage worldStage;
+//    private CodeEditorStage codeEditorStage;
 
     @Override
     public void resize(int width, int height) {
         worldStage.resize(width, height);
-        Gdx.input.setInputProcessor(worldStage);
     }
 
     @Override
     public void create() {
         batch = new SpriteBatch();
+
         worldStage = new WorldStage(batch);
+        Gdx.input.setInputProcessor(worldStage);
+//        codeEditorStage = new CodeEditorStage();
     }
 
     @Override
@@ -29,6 +32,8 @@ public class GameHolder extends ApplicationAdapter {
 
         worldStage.update();
         worldStage.draw();
+//        codeEditorStage.act(Gdx.graphics.getDeltaTime());
+//        codeEditorStage.draw();
     }
 
     @Override

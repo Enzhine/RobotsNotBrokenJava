@@ -1,0 +1,34 @@
+{
+  "type": "stateful",
+  "beginState": 1,
+  "states": {
+    "0": {
+      "type": "static",
+      "src": {
+        "type": "part",
+        "from": {
+          "type": "path",
+          "path": "entity/robot_atlas.png"
+        },
+        "x": 0,
+        "y": 0,
+        "width": 11,
+        "height": 11
+      }
+    },
+    "1": {
+      "type": "static",
+      "src": {
+        "type": "part",
+        "from": {
+          "type": "path",
+          "path": "entity/robot_atlas.png"
+        },
+        "x": 11,
+        "y": 0,
+        "width": 11,
+        "height": 11
+      }
+    }
+  }
+}

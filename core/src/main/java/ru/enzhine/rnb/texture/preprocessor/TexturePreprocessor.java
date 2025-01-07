@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value = PathTexturePreprocessor.class, name = "path"),
+        @JsonSubTypes.Type(value = PartTexturePreprocessor.class, name = "part"),
         @JsonSubTypes.Type(value = LayeredTexturePreprocessor.class, name = "layered")
 })
 public interface TexturePreprocessor {

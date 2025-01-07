@@ -1,26 +1,22 @@
 package ru.enzhine.rnb.editor;
 
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 
 import java.util.LinkedList;
-import java.util.ListIterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CodeEditor implements TextEditor, KeyboardListener {
-
-    private final float x;
-    private final float y;
+public class CodeEditor extends Widget implements TextEditor, KeyboardListener {
 
     private final BitmapFont bitmapFont;
     private final LinkedList<StringBuilder> lines;
-    private  CurrentListIterator<StringBuilder> currentLineIterator;
+    private CurrentListIterator<StringBuilder> currentLineIterator;
     private StringBuilder currentLine;
     private int position;
 
-    public CodeEditor(float x, float y) {
-        this.x = x;
-        this.y = y;
+    public CodeEditor() {
+        super();
 
         this.bitmapFont = new BitmapFont();
         this.bitmapFont.getData().markupEnabled = true;
@@ -29,17 +25,13 @@ public class CodeEditor implements TextEditor, KeyboardListener {
         reset();
     }
 
-    private void reset() {
-        this.lines.add(new StringBuilder());
-        this.position = 0;
-        this.currentLineIterator = new CurrentListIterator<>(this.lines.listIterator());
-        this.currentLine = this.currentLineIterator.get();
-    }
-
-    public void render(SpriteBatch batch) {
-        batch.begin();
+    @Override
+    public void draw(Batch batch, float parentAlpha) {
         int lineId = 0;
         float lineH = bitmapFont.getLineHeight();
+        float x = getX();
+        float y = getY();
+
         for (StringBuilder line : lines) {
             this.bitmapFont.draw(batch, String.valueOf(lineId + 1), x, y - lineId * lineH, 0, 0, false);
             if (lineId != currentLineIterator.index()) {
@@ -51,7 +43,13 @@ public class CodeEditor implements TextEditor, KeyboardListener {
             }
             lineId += 1;
         }
-        batch.end();
+    }
+
+    private void reset() {
+        this.lines.add(new StringBuilder());
+        this.position = 0;
+        this.currentLineIterator = new CurrentListIterator<>(this.lines.listIterator());
+        this.currentLine = this.currentLineIterator.get();
     }
 
     public void dispose() {

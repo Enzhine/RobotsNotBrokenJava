@@ -8,7 +8,7 @@ import ru.enzhine.rnb.world.block.base.BiomeType;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-public class Textures {
+public class TextureRenderers {
     private static final HashMap<String, TextureRenderer<RenderingContext>> cache = new LinkedHashMap<>();
 
     private static TextureRendererFactory textureRendererFactory;

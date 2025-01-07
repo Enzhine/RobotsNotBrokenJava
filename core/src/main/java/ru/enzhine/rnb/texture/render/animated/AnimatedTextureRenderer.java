@@ -1,12 +1,12 @@
 package ru.enzhine.rnb.texture.render.animated;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.extern.jackson.Jacksonized;
-import ru.enzhine.rnb.Main;
 import ru.enzhine.rnb.texture.exception.TextureRendererException;
 import ru.enzhine.rnb.texture.outline.AverageOutlineColor;
 import ru.enzhine.rnb.texture.outline.OutlineColorStrategy;
@@ -84,7 +84,7 @@ public class AnimatedTextureRenderer implements TextureRenderer<AnimatedRenderin
 
     @Override
     public void render(AnimatedRenderingContext context, SpriteBatch spriteBatch, float x, float y, int srcX, int srcY, int width, int height) {
-        updateContext(context, Main.getDeltaTime());
+        updateContext(context, Gdx.graphics.getDeltaTime());
         int offX = xOffsetByFrame(context.getCurrentFrame()) * this.width;
         if (preparedTexture.getUWrap() == Texture.TextureWrap.Repeat) {
             offX += srcX;

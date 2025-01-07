@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.extern.jackson.Jacksonized;
-import ru.enzhine.rnb.texture.Textures;
+import ru.enzhine.rnb.texture.TextureRenderers;
 import ru.enzhine.rnb.texture.exception.TextureRendererException;
 import ru.enzhine.rnb.texture.render.RefTextureRenderer;
 import ru.enzhine.rnb.texture.render.RenderingContext;
@@ -48,7 +48,7 @@ public class StatefulTextureRenderer implements TextureRenderer<StatefulRenderin
 
             if (entry.getValue() instanceof RefTextureRenderer) {
                 var path = ((RefTextureRenderer) entry.getValue()).getPath();
-                preparedStates.set(state, Textures.getTextureRenderer(path));
+                preparedStates.set(state, TextureRenderers.getTextureRenderer(path));
             } else {
                 preparedStates.set(state, value);
                 value.prepare();
@@ -84,7 +84,7 @@ public class StatefulTextureRenderer implements TextureRenderer<StatefulRenderin
         for (var entry : states.entrySet()) {
             if (entry.getValue() instanceof RefTextureRenderer) {
                 var path = ((RefTextureRenderer) entry.getValue()).getPath();
-                entry.setValue(Textures.getTextureRenderer(path));
+                entry.setValue(TextureRenderers.getTextureRenderer(path));
             }
         }
     }

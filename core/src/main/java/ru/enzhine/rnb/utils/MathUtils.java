@@ -1,5 +1,6 @@
 package ru.enzhine.rnb.utils;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector3;
 
 public class MathUtils {
@@ -27,6 +28,25 @@ public class MathUtils {
 
     private static float easeOutCubic(float x) {
         return 1 - (1 - x) * (1 - x) * (1 - x);
+    }
+
+    public static float lerp(float from, float to, float progress) {
+        return from + (to - from) * progress;
+    }
+
+    public static Color lerp(Color from, Color to, float progress) {
+        return new Color(lerp(from.r, to.r, progress), lerp(from.g, to.g, progress), lerp(from.b, to.b, progress), lerp(from.a, to.a, progress));
+    }
+
+    public static float bilerp(float from, float to, float progress) {
+        if (progress < 0.5f) {
+            return lerp(from, to, progress * 2f);
+        }
+        return lerp(to, from, (progress - 0.5f) * 2f);
+    }
+
+    public static Color bilerp(Color from, Color to, float progress) {
+        return new Color(bilerp(from.r, to.r, progress), bilerp(from.g, to.g, progress), bilerp(from.b, to.b, progress), bilerp(from.a, to.a, progress));
     }
 
     public static float cerp(float from, float to, float progress) {

@@ -8,17 +8,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import ru.enzhine.rnb.stages.input.BlockController;
+import ru.enzhine.rnb.stages.input.WorldUIController;
 import ru.enzhine.rnb.stages.input.MoveController;
 import ru.enzhine.rnb.stages.input.ZoomController;
 import ru.enzhine.rnb.world.WorldImpl;
-import ru.enzhine.rnb.world.block.base.Block;
 import ru.enzhine.rnb.world.block.base.BlockType;
-import ru.enzhine.rnb.world.entity.Robot;
-import ru.enzhine.rnb.world.entity.base.Entity;
 import ru.enzhine.rnb.world.entity.base.EntityType;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
@@ -33,7 +29,7 @@ public class WorldStage extends Stage {
 
     private final ZoomController zoomController;
     private final MoveController moveController;
-    private final BlockController blockController;
+    private final WorldUIController worldUIController;
 
     private final WorldImpl w;
 
@@ -55,7 +51,7 @@ public class WorldStage extends Stage {
         w = new WorldImpl(10, 43, 0.2f, 0.2f);
         initWorld();
 
-        blockController = new BlockController(worldViewport, w);
+        worldUIController = new WorldUIController(worldViewport, w);
     }
 
     private void initWorld() {
@@ -86,7 +82,7 @@ public class WorldStage extends Stage {
     public void update() {
         float td = Gdx.graphics.getDeltaTime();
         moveController.sync(td);
-        blockController.update();
+        worldUIController.update(td);
     }
 
     @Override
@@ -97,7 +93,7 @@ public class WorldStage extends Stage {
 
         batch.begin();
         w.batch(batch, shapeDrawer, worldViewport);
-        blockController.outlineSelected(shapeDrawer);
+        worldUIController.onRender(shapeDrawer);
         batch.end();
 
         hudViewport.apply();

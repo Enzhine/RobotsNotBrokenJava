@@ -3,9 +3,8 @@ package ru.enzhine.rnb.world.block.base;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import ru.enzhine.rnb.texture.Textures;
+import ru.enzhine.rnb.texture.TextureRenderers;
 import ru.enzhine.rnb.texture.render.TextureRenderer;
 import ru.enzhine.rnb.texture.render.RenderingContext;
 import ru.enzhine.rnb.world.Location;
@@ -24,7 +23,7 @@ public abstract class OpaqueBlock implements Block, Rendering {
     protected RenderingContext rendererContext;
 
     public OpaqueBlock(String sprite, Location loc, BlockType bt, Material material, BiomeType biomeType) {
-        this(Textures.getTextureRenderer(sprite), loc, bt, material, biomeType);
+        this(TextureRenderers.getTextureRenderer(sprite), loc, bt, material, biomeType);
     }
 
     public OpaqueBlock(TextureRenderer<RenderingContext> textureRenderer, Location loc, BlockType bt, Material material, BiomeType biomeType) {
