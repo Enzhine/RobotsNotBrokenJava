@@ -10,6 +10,7 @@ import ru.enzhine.rnb.texture.exception.TextureRendererException;
 import ru.enzhine.rnb.texture.render.RefTextureRenderer;
 import ru.enzhine.rnb.texture.render.RenderingContext;
 import ru.enzhine.rnb.texture.render.TextureRenderer;
+import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,14 +42,14 @@ public class StatefulTextureRenderer implements TextureRenderer<StatefulRenderin
         for (var entry : states.entrySet()) {
             var state = Integer.parseInt(entry.getKey());
             var value = entry.getValue();
-            if(state < 0 || state >= size) {
+            if (state < 0 || state >= size) {
                 throw new TextureRendererException(String.format("Keys must be non-negative integers values from 0 to %d", size));
             }
 
             if (entry.getValue() instanceof RefTextureRenderer) {
-                var path = ((RefTextureRenderer)entry.getValue()).getPath();
+                var path = ((RefTextureRenderer) entry.getValue()).getPath();
                 preparedStates.set(state, Textures.getTextureRenderer(path));
-            }else {
+            } else {
                 preparedStates.set(state, value);
                 value.prepare();
             }
@@ -70,6 +71,11 @@ public class StatefulTextureRenderer implements TextureRenderer<StatefulRenderin
         getCurrentTextureRenderer(context).render(context.getCurrentContext(), spriteBatch, x, y, srcX, srcY, width, height);
     }
 
+    @Override
+    public void renderLow(StatefulRenderingContext context, SpriteBatch spriteBatch, ShapeDrawer shapeDrawer, float x, float y, int width, int height) {
+        getCurrentTextureRenderer(context).renderLow(context.getCurrentContext(), spriteBatch, shapeDrawer, x, y, width, height);
+    }
+
     private TextureRenderer<RenderingContext> getCurrentTextureRenderer(StatefulRenderingContext context) {
         return preparedStates.get(context.getCurrentState());
     }
@@ -77,7 +83,7 @@ public class StatefulTextureRenderer implements TextureRenderer<StatefulRenderin
     private void processReferences() {
         for (var entry : states.entrySet()) {
             if (entry.getValue() instanceof RefTextureRenderer) {
-                var path = ((RefTextureRenderer)entry.getValue()).getPath();
+                var path = ((RefTextureRenderer) entry.getValue()).getPath();
                 entry.setValue(Textures.getTextureRenderer(path));
             }
         }

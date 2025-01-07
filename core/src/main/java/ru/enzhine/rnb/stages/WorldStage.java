@@ -11,9 +11,15 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import ru.enzhine.rnb.stages.input.BlockController;
 import ru.enzhine.rnb.stages.input.MoveController;
 import ru.enzhine.rnb.stages.input.ZoomController;
 import ru.enzhine.rnb.world.WorldImpl;
+import ru.enzhine.rnb.world.block.base.Block;
+import ru.enzhine.rnb.world.block.base.BlockType;
+import ru.enzhine.rnb.world.entity.Robot;
+import ru.enzhine.rnb.world.entity.base.Entity;
+import ru.enzhine.rnb.world.entity.base.EntityType;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class WorldStage extends Stage {
@@ -27,6 +33,9 @@ public class WorldStage extends Stage {
 
     private final ZoomController zoomController;
     private final MoveController moveController;
+    private final BlockController blockController;
+
+    private final WorldImpl w;
 
     public WorldStage(SpriteBatch batch) {
         this.batch = batch;
@@ -43,16 +52,24 @@ public class WorldStage extends Stage {
         zoomController = new ZoomController((OrthographicCamera) worldViewport.getCamera(), 0.06f, 1f);
         moveController = new MoveController(worldViewport);
 
+        w = new WorldImpl(10, 43, 0.2f, 0.2f);
         initWorld();
+
+        blockController = new BlockController(worldViewport, w);
     }
 
-    private WorldImpl w;
-
     private void initWorld() {
-        w = new WorldImpl(10, 43, 0.2f, 0.2f);
-        long radius = 10;
-        w.genRangeChunks(-(2 * radius), 2 * radius, -radius, radius);
+        long radius = 3;
+        w.genRangeChunks(-2 * radius, 2 * radius, -2 * radius, 2 * radius);
 //        w.genRangeChunks(0L, 0L, 0L, 0L);
+
+        w.setBlock(BlockType.AIR, 4L, 4L);
+        w.setBlock(BlockType.AIR, 5L, 4L);
+        w.setBlock(BlockType.AIR, 4L, 5L);
+        w.setBlock(BlockType.AIR, 5L, 5L);
+        var robot = w.summonEntity(EntityType.ROBOT, 5d, 4d);
+
+        focus(robot.getLocation().getX().floatValue() * WorldImpl.BLOCK_PIXEL_SIZE, robot.getLocation().getY().floatValue() * WorldImpl.BLOCK_PIXEL_SIZE, 0.5f, 2f);
     }
 
     @Override
@@ -67,7 +84,9 @@ public class WorldStage extends Stage {
     }
 
     public void update() {
-        moveController.update();
+        float td = Gdx.graphics.getDeltaTime();
+        moveController.sync(td);
+        blockController.update();
     }
 
     @Override
@@ -78,6 +97,7 @@ public class WorldStage extends Stage {
 
         batch.begin();
         w.batch(batch, shapeDrawer, worldViewport);
+        blockController.outlineSelected(shapeDrawer);
         batch.end();
 
         hudViewport.apply();
@@ -98,8 +118,13 @@ public class WorldStage extends Stage {
         BitmapFont font = new BitmapFont();
         batch.setProjectionMatrix(hudViewport.getCamera().combined);
         batch.begin();
-        font.draw(batch, "FPS " + Gdx.graphics.getFramesPerSecond(), 0, hudViewport.getCamera().viewportHeight);
+        font.draw(batch, String.format("FPS %d", Gdx.graphics.getFramesPerSecond()), 0, hudViewport.getCamera().viewportHeight);
         batch.end();
         font.dispose();
+    }
+
+    public void focus(float wX, float wY, float zoom, float seconds) {
+        moveController.focusAt(wX, wY, seconds);
+        zoomController.zoomTo(zoom, seconds);
     }
 }

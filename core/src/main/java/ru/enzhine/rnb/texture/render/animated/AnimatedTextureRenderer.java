@@ -13,6 +13,8 @@ import ru.enzhine.rnb.texture.outline.OutlineColorStrategy;
 import ru.enzhine.rnb.texture.preprocessor.TexturePreprocessor;
 import ru.enzhine.rnb.texture.render.TextureRenderer;
 import ru.enzhine.rnb.texture.render.TextureRendererProperties;
+import ru.enzhine.rnb.utils.TextureUtils;
+import space.earlygrey.shapedrawer.ShapeDrawer;
 
 @Builder
 @Jacksonized
@@ -42,6 +44,7 @@ public class AnimatedTextureRenderer implements TextureRenderer<AnimatedRenderin
     private final RenderingLoop loop;
 
     private Texture preparedTexture;
+    private Color preparedLowColor;
     private Color preparedOutlineColor;
     private int xScaled;
     private int yScaled;
@@ -54,6 +57,7 @@ public class AnimatedTextureRenderer implements TextureRenderer<AnimatedRenderin
         }
 
         preparedTexture = src.process();
+        preparedLowColor = TextureUtils.getAverageColor(preparedTexture);
         preparedTexture.setWrap(properties.getUWrap(), properties.getVWrap());
         this.xScaled = preparedTexture.getWidth() / width;
         this.yScaled = preparedTexture.getHeight() / height;
@@ -90,6 +94,11 @@ public class AnimatedTextureRenderer implements TextureRenderer<AnimatedRenderin
             offY += srcY;
         }
         spriteBatch.draw(preparedTexture, x, y, offX, offY, this.width, this.height);
+    }
+
+    @Override
+    public void renderLow(AnimatedRenderingContext context, SpriteBatch spriteBatch, ShapeDrawer shapeDrawer, float x, float y, int width, int height) {
+        shapeDrawer.filledRectangle(x, y, width, height, preparedLowColor);
     }
 
     private void updateContext(AnimatedRenderingContext context, float deltaTime) {

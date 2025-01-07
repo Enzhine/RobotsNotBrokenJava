@@ -1,5 +1,7 @@
 package ru.enzhine.rnb.utils;
 
+import com.badlogic.gdx.math.Vector3;
+
 public class MathUtils {
     public static int remainder(long value, int mod) {
         int res = (int) (value % mod);
@@ -23,16 +25,16 @@ public class MathUtils {
         return Math.sqrt(squaredDistanceBetween(x1, y1, x2, y2));
     }
 
-    public static float lerp(float from, float to, float progress) {
-        return from + (to - from) * progress;
-    }
-
     private static float easeOutCubic(float x) {
         return 1 - (1 - x) * (1 - x) * (1 - x);
     }
 
     public static float cerp(float from, float to, float progress) {
         return from + (to - from) * easeOutCubic(progress);
+    }
+
+    public static Vector3 cerp(Vector3 from, Vector3 to, float progress) {
+        return new Vector3(cerp(from.x, to.x, progress), cerp(from.y, to.y, progress), cerp(from.z, to.z, progress));
     }
 
     public static long blockPos(float x) {

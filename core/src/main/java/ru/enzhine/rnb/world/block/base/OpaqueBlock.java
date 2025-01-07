@@ -1,5 +1,7 @@
 package ru.enzhine.rnb.world.block.base;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -84,6 +86,11 @@ public abstract class OpaqueBlock implements Block, Rendering {
         return true;
     }
 
+    private boolean needToOptimize(Viewport viewport) {
+        var zoom = ((OrthographicCamera) viewport.getCamera()).zoom;
+        return zoom >= 2f;
+    }
+
     @Override
     public void batch(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
         if (!shouldRenderBlockTexture()) {
@@ -92,19 +99,23 @@ public abstract class OpaqueBlock implements Block, Rendering {
 
         float x = loc.getBlockX() * WorldImpl.BLOCK_PIXEL_SIZE;
         float y = loc.getBlockY() * WorldImpl.BLOCK_PIXEL_SIZE;
+        var outlineColor = this.renderer.getOutlineColor(this.rendererContext);
+
+        if (needToOptimize(viewport)) {
+            renderer.renderLow(this.rendererContext, batch, drawer, x, y, WorldImpl.BLOCK_PIXEL_SIZE, WorldImpl.BLOCK_PIXEL_SIZE);
+            return;
+        }
+
         int srcX = loc.getBlockX().intValue() * WorldImpl.BLOCK_PIXEL_SIZE;
         int srcY = -loc.getBlockY().intValue() * WorldImpl.BLOCK_PIXEL_SIZE;
         renderer.render(this.rendererContext, batch, x, y, srcX, srcY, WorldImpl.BLOCK_PIXEL_SIZE, WorldImpl.BLOCK_PIXEL_SIZE);
 
-        if (!shouldRenderOutline()) {
-            return;
+        if (shouldRenderOutline() && outlineColor != null) {
+            drawOutline(drawer, outlineColor);
         }
+    }
 
-        var outlineColor = this.renderer.getOutlineColor(this.rendererContext);
-        if (outlineColor == null) {
-            return;
-        }
-
+    void drawOutline(ShapeDrawer drawer, Color outlineColor) {
         var bottom = atBottom();
         if (bottom != null && bottom.getMaterial() != getMaterial()) {
             drawer.line(

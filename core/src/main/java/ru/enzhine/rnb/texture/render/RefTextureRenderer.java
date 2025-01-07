@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.jackson.Jacksonized;
 import ru.enzhine.rnb.texture.exception.TextureRendererException;
+import space.earlygrey.shapedrawer.ShapeDrawer;
 
 @Getter
 @Builder
@@ -18,21 +19,26 @@ public class RefTextureRenderer implements TextureRenderer<RenderingContext> {
 
     @Override
     public void prepare() {
-        throw new TextureRendererException("This renderer must be replaced with real one");
+        throw new TextureRendererException("This renderer must be replaced with referenced one");
     }
 
     @Override
     public RenderingContext newContext() {
-        throw new TextureRendererException("This renderer must be replaced with real one");
+        throw new TextureRendererException("This renderer must be replaced with referenced one");
     }
 
     @Override
     public Color getOutlineColor(RenderingContext context) {
-        throw new TextureRendererException("This renderer must be replaced with real one");
+        throw new TextureRendererException("This renderer must be replaced with referenced one");
     }
 
     @Override
     public void render(RenderingContext context, SpriteBatch spriteBatch, float x, float y, int srcX, int srcY, int width, int height) {
-        throw new TextureRendererException("This renderer must be replaced with real one");
+        throw new TextureRendererException("This renderer must be replaced with referenced one");
+    }
+
+    @Override
+    public void renderLow(RenderingContext context, SpriteBatch spriteBatch, ShapeDrawer shapeDrawer, float x, float y, int width, int height) {
+        throw new TextureRendererException("This renderer must be replaced with referenced one");
     }
 }

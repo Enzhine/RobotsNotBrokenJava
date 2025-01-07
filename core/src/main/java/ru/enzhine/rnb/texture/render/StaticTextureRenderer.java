@@ -9,6 +9,8 @@ import ru.enzhine.rnb.texture.exception.TextureRendererException;
 import ru.enzhine.rnb.texture.outline.AverageOutlineColor;
 import ru.enzhine.rnb.texture.outline.OutlineColorStrategy;
 import ru.enzhine.rnb.texture.preprocessor.TexturePreprocessor;
+import ru.enzhine.rnb.utils.TextureUtils;
+import space.earlygrey.shapedrawer.ShapeDrawer;
 
 @Builder
 @Jacksonized
@@ -28,6 +30,7 @@ public class StaticTextureRenderer implements TextureRenderer<RenderingContext> 
     private OutlineColorStrategy outline = AverageOutlineColor.builder().build();
 
     private Texture preparedTexture;
+    private Color preparedLowColor;
     private Color preparedOutlineColor;
 
     @Override
@@ -38,6 +41,7 @@ public class StaticTextureRenderer implements TextureRenderer<RenderingContext> 
 
         preparedTexture = src.process();
         preparedTexture.setWrap(properties.getUWrap(), properties.getVWrap());
+        preparedLowColor = TextureUtils.getAverageColor(preparedTexture);
         preparedOutlineColor = outline.getColor(preparedTexture);
     }
 
@@ -57,5 +61,10 @@ public class StaticTextureRenderer implements TextureRenderer<RenderingContext> 
     @Override
     public void render(RenderingContext context, SpriteBatch spriteBatch, float x, float y, int srcX, int srcY, int width, int height) {
         spriteBatch.draw(preparedTexture, x, y, srcX, srcY, width, height);
+    }
+
+    @Override
+    public void renderLow(RenderingContext context, SpriteBatch spriteBatch, ShapeDrawer shapeDrawer, float x, float y, int width, int height) {
+        shapeDrawer.filledRectangle(x, y, width, height, preparedLowColor);
     }
 }
