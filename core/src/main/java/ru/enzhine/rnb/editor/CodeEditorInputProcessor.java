@@ -16,7 +16,6 @@ public class CodeEditorInputProcessor extends ShortcutInputAdapter {
 
     @Override
     public boolean keyDown(int keycode) {
-        System.out.println(keycode);
         switch (keycode) {
             case Input.Keys.ENTER -> codeEditor.onNewline();
             case Input.Keys.UP -> codeEditor.up();

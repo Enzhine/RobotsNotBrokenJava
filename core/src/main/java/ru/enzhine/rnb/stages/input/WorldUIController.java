@@ -3,6 +3,8 @@ package ru.enzhine.rnb.stages.input;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import lombok.Getter;
@@ -11,12 +13,13 @@ import ru.enzhine.rnb.world.Chunk;
 import ru.enzhine.rnb.world.World;
 import ru.enzhine.rnb.world.WorldImpl;
 import ru.enzhine.rnb.world.block.base.Block;
+import ru.enzhine.rnb.world.block.base.Rendering;
 import ru.enzhine.rnb.world.entity.base.Entity;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import java.util.ListIterator;
 
-public class WorldUIController {
+public class WorldUIController implements Rendering {
 
     private final Viewport viewport;
     private final World world;
@@ -83,13 +86,16 @@ public class WorldUIController {
         }
     }
 
-    public void onRender(ShapeDrawer shapeDrawer) {
-        outlineCursor(shapeDrawer);
-        outlineSelected(shapeDrawer);
+    @Override
+    public void render(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
+        outlineSelected(drawer);
+        outlineCursor(drawer);
     }
 
     public void outlineSelected(ShapeDrawer shapeDrawer) {
         var progress = secondsAccumulation / secondsThreshold;
+        var scale = viewport.getWorldWidth() / viewport.getScreenWidth() * getZoom();
+
         if (selectedEntity != null) {
             var bb = selectedEntity.getBoundingBox();
             shapeDrawer.rectangle(
@@ -98,7 +104,7 @@ public class WorldUIController {
                     bb.getPxWidth(),
                     bb.getPxHeight(),
                     MathUtils.bilerp(Color.WHITE, Color.BLACK, progress),
-                    0.4f
+                    4f * scale
             );
         } else if (selectedBlock != null) {
             var blockLoc = selectedBlock.getLocation();
@@ -108,12 +114,14 @@ public class WorldUIController {
                     WorldImpl.BLOCK_PIXEL_SIZE,
                     WorldImpl.BLOCK_PIXEL_SIZE,
                     MathUtils.bilerp(Color.WHITE, Color.BLACK, progress),
-                    0.4f
+                    4f * scale
             );
         }
     }
 
     public void outlineCursor(ShapeDrawer shapeDrawer) {
+        var scale = viewport.getWorldWidth() / viewport.getScreenWidth() * getZoom();
+
         if (currentEntity != null) {
             var bb = currentEntity.getBoundingBox();
             shapeDrawer.rectangle(
@@ -122,7 +130,7 @@ public class WorldUIController {
                     bb.getPxWidth(),
                     bb.getPxHeight(),
                     Color.WHITE,
-                    0.4f
+                    2f * scale
             );
         } else if (currentBlock != null) {
             var blockLoc = currentBlock.getLocation();
@@ -132,9 +140,13 @@ public class WorldUIController {
                     WorldImpl.BLOCK_PIXEL_SIZE,
                     WorldImpl.BLOCK_PIXEL_SIZE,
                     Color.WHITE,
-                    0.4f
+                    2f * scale
             );
         }
+    }
+
+    private float getZoom() {
+        return ((OrthographicCamera) viewport.getCamera()).zoom;
     }
 
     private Vector3 getMouseWorldPos() {

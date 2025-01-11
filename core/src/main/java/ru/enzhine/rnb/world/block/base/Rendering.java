@@ -5,5 +5,5 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public interface Rendering {
-    void batch(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport);
+    void render(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport);
 }

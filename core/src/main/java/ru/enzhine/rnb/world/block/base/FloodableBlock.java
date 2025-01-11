@@ -76,8 +76,8 @@ public abstract class FloodableBlock extends TransparentBlock implements Floodab
     }
 
     @Override
-    public void batch(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
-        super.batch(batch, drawer, viewport);
+    public void render(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
+        super.render(batch, drawer, viewport);
 
         if (totalFluid == 0) {
             return;

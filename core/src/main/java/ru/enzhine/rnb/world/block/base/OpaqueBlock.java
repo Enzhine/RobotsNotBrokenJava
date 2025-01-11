@@ -85,20 +85,19 @@ public abstract class OpaqueBlock implements Block, Rendering {
         return true;
     }
 
-    private boolean needToOptimize(Viewport viewport) {
+    protected boolean needToOptimize(Viewport viewport) {
         var zoom = ((OrthographicCamera) viewport.getCamera()).zoom;
         return zoom >= 2f;
     }
 
     @Override
-    public void batch(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
+    public void render(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
         if (!shouldRenderBlockTexture()) {
             return;
         }
 
         float x = loc.getBlockX() * WorldImpl.BLOCK_PIXEL_SIZE;
         float y = loc.getBlockY() * WorldImpl.BLOCK_PIXEL_SIZE;
-        var outlineColor = this.renderer.getOutlineColor(this.rendererContext);
 
         if (needToOptimize(viewport)) {
             renderer.renderLow(this.rendererContext, batch, drawer, x, y, WorldImpl.BLOCK_PIXEL_SIZE, WorldImpl.BLOCK_PIXEL_SIZE);
@@ -109,6 +108,7 @@ public abstract class OpaqueBlock implements Block, Rendering {
         int srcY = -loc.getBlockY().intValue() * WorldImpl.BLOCK_PIXEL_SIZE;
         renderer.render(this.rendererContext, batch, x, y, srcX, srcY, WorldImpl.BLOCK_PIXEL_SIZE, WorldImpl.BLOCK_PIXEL_SIZE);
 
+        var outlineColor = this.renderer.getOutlineColor(this.rendererContext);
         if (shouldRenderOutline() && outlineColor != null) {
             drawOutline(drawer, outlineColor);
         }

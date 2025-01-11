@@ -1,5 +1,6 @@
 package ru.enzhine.rnb.world.entity.base;
 
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -16,14 +17,14 @@ public abstract class BasicEntity implements Entity {
     protected final BoundingBox boundingBox;
 
     protected final TextureRenderer<RenderingContext> renderer;
-    protected RenderingContext renderingContext;
+    protected RenderingContext rendererContext;
 
     public BasicEntity(TextureRenderer<RenderingContext> textureRenderer, EntityType entityType, Location location, BoundingBox boundingBox) {
         this.loc = location;
         this.entityType = entityType;
         this.boundingBox = boundingBox;
         this.renderer = textureRenderer;
-        this.renderingContext = this.renderer.newContext();
+        this.rendererContext = this.renderer.newContext();
     }
 
     @Override
@@ -46,9 +47,27 @@ public abstract class BasicEntity implements Entity {
         return this.boundingBox.translated(this.loc.getX(), this.loc.getY());
     }
 
+    public boolean shouldRenderEntityTexture() {
+        return true;
+    }
+
+    protected boolean needToOptimize(Viewport viewport) {
+        var zoom = ((OrthographicCamera) viewport.getCamera()).zoom;
+        return zoom >= 2f;
+    }
+
     @Override
-    public void batch(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
+    public void render(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
+        if (!shouldRenderEntityTexture()) {
+            return;
+        }
+
         var bb = getBoundingBox();
-        renderer.render(this.renderingContext, batch, (int) (bb.getX() * WorldImpl.BLOCK_PIXEL_SIZE), (int) (bb.getY() * WorldImpl.BLOCK_PIXEL_SIZE), 0, 0, bb.getPxWidth(), bb.getPxHeight());
+        if (needToOptimize(viewport)) {
+            renderer.renderLow(this.rendererContext, batch, drawer, (int) (bb.getX() * WorldImpl.BLOCK_PIXEL_SIZE), (int) (bb.getY() * WorldImpl.BLOCK_PIXEL_SIZE), bb.getPxWidth(), bb.getPxHeight());
+            return;
+        }
+
+        renderer.render(this.rendererContext, batch, (int) (bb.getX() * WorldImpl.BLOCK_PIXEL_SIZE), (int) (bb.getY() * WorldImpl.BLOCK_PIXEL_SIZE), 0, 0, bb.getPxWidth(), bb.getPxHeight());
     }
 }

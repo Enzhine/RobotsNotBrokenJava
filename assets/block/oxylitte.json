@@ -1,0 +1,16 @@
+{
+  "type": "animated",
+  "src": {
+    "type": "path",
+    "path": "block/oxylitte.png"
+  },
+  "properties": {
+    "uWrap": "Repeat",
+    "vWrap": "Repeat"
+  },
+  "width": 32,
+  "height": 32,
+  "seconds": 1,
+  "order": "INWARDS",
+  "loop": "CYCLE"
+}

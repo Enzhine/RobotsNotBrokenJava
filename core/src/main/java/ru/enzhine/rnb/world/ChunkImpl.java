@@ -155,7 +155,7 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
     }
 
     @Override
-    public void batch(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
+    public void render(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
         for (int i = 0; i < blockLayer.length; i++) {
             Block b = blockLayer[i];
             float tint = colorOfLevel(lightLayer[i]);
@@ -163,20 +163,20 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
             if (b instanceof Rendering) {
                 Color prev = batch.getColor();
                 batch.setColor(tint, tint, tint, 1f);
-                ((Rendering) b).batch(batch, drawer, viewport);
+                ((Rendering) b).render(batch, drawer, viewport);
                 batch.setColor(prev);
             }
         }
         for (Entity e : entities) {
-            e.batch(batch, drawer, viewport);
+            e.render(batch, drawer, viewport);
         }
     }
 
     @Override
     public void onTick() {
         for (Block b : blockLayer) {
-            if (b instanceof Ticking) {
-                ((Ticking) b).onTick();
+            if (b instanceof Ticking ticking) {
+                ticking.onTick();
             }
         }
     }

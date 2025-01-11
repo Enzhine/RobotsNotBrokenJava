@@ -1,6 +1,5 @@
 package ru.enzhine.rnb.world;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
@@ -21,8 +20,6 @@ import ru.enzhine.rnb.world.entity.base.EntityFactoryImpl;
 import ru.enzhine.rnb.world.entity.base.EntityType;
 import ru.enzhine.rnb.world.gen.*;
 import space.earlygrey.shapedrawer.ShapeDrawer;
-
-import java.awt.*;
 
 public class WorldImpl implements World, Rendering {
 
@@ -135,12 +132,12 @@ public class WorldImpl implements World, Rendering {
     }
 
     @Override
-    public void batch(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
+    public void render(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
         var topLeft = getTopLeftWorldChunkCoords(viewport, drawer);
         var bottomRight = getBottomRightWorldChunkCoords(viewport, drawer);
 
         for (ChunkImpl chunk : gameMap.withinBounds(topLeft.getLeft(), bottomRight.getLeft(), bottomRight.getRight(), topLeft.getRight())) {
-            chunk.batch(batch, drawer, viewport);
+            chunk.render(batch, drawer, viewport);
         }
     }
 

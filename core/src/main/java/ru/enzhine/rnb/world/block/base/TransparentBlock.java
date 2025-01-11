@@ -32,7 +32,7 @@ public abstract class TransparentBlock extends OpaqueBlock {
     }
 
     @Override
-    public void batch(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
+    public void render(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
         if (shouldRenderBG()) {
             float x = loc.getBlockX() * WorldImpl.BLOCK_PIXEL_SIZE;
             float y = loc.getBlockY() * WorldImpl.BLOCK_PIXEL_SIZE;
@@ -43,6 +43,6 @@ public abstract class TransparentBlock extends OpaqueBlock {
             bgRenderer.render(bgRendererContext, batch, x, y, srcX, srcY, WorldImpl.BLOCK_PIXEL_SIZE, WorldImpl.BLOCK_PIXEL_SIZE);
         }
 
-        super.batch(batch, drawer, viewport);
+        super.render(batch, drawer, viewport);
     }
 }

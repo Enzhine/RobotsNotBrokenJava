@@ -8,6 +8,6 @@ import ru.enzhine.rnb.world.Material;
 
 public class OxylitteBlock extends OpaqueBlock {
     public OxylitteBlock(Location loc, BiomeType biomeType) {
-        super("block/oxylitte.png", loc, BlockType.OXYLITTE, Material.OXYLITTE, biomeType);
+        super("block/oxylitte.json", loc, BlockType.OXYLITTE, Material.OXYLITTE, biomeType);
     }
 }
