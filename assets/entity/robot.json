@@ -29,6 +29,20 @@
         "width": 11,
         "height": 11
       }
+    },
+	"2": {
+      "type": "static",
+      "src": {
+        "type": "part",
+        "from": {
+          "type": "path",
+          "path": "entity/robot_atlas.png"
+        },
+        "x": 22,
+        "y": 0,
+        "width": 11,
+        "height": 11
+      }
     }
   }
 }

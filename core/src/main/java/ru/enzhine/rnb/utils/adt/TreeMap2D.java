@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+// TODO: make thread-safe
 public class TreeMap2D<V extends Placeable2D> implements Map2D<V> {
 
     private final SortedMap<Long, SortedMap<Long, V>> byX = new TreeMap<>();
