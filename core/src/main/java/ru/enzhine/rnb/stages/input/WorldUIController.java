@@ -6,14 +6,18 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import lombok.Getter;
+import ru.enzhine.rnb.stages.WorldStage;
 import ru.enzhine.rnb.utils.MathUtils;
 import ru.enzhine.rnb.world.Chunk;
 import ru.enzhine.rnb.world.World;
 import ru.enzhine.rnb.world.WorldImpl;
 import ru.enzhine.rnb.world.block.base.Block;
 import ru.enzhine.rnb.world.block.base.Rendering;
+import ru.enzhine.rnb.world.entity.Robot;
+import ru.enzhine.rnb.world.entity.base.PhysicalEntity;
 import ru.enzhine.rnb.world.entity.base.Entity;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
@@ -23,23 +27,25 @@ public class WorldUIController implements Rendering {
 
     private final Viewport viewport;
     private final World world;
+    private TextButton codeButton;
 
     @Getter
     private Block currentBlock;
     @Getter
-    private Entity currentEntity;
-
+    private PhysicalEntity currentEntity;
     @Getter
     private Block selectedBlock;
     @Getter
-    private Entity selectedEntity;
+    private PhysicalEntity selectedEntity;
 
     private final float secondsThreshold;
     private float secondsAccumulation;
 
-    public WorldUIController(Viewport viewport, World world) {
+
+    public WorldUIController(Viewport viewport, World world, TextButton codeButton) {
         this.viewport = viewport;
         this.world = world;
+        this.codeButton = codeButton;
 
         this.secondsThreshold = 1f;
         this.secondsAccumulation = 0f;
@@ -50,11 +56,13 @@ public class WorldUIController implements Rendering {
         if (secondsAccumulation > secondsThreshold) {
             secondsAccumulation = 0;
         }
+    }
 
+    public void mouseMoved(int screenX, int screenY) {
         currentBlock = null;
         currentEntity = null;
 
-        var proj = getMouseWorldPos();
+        var proj = viewport.getCamera().unproject(new Vector3(screenX, screenY, 0));
         var blockX = MathUtils.blockPos(proj.x / WorldImpl.BLOCK_PIXEL_SIZE);
         var blockY = MathUtils.blockPos(proj.y / WorldImpl.BLOCK_PIXEL_SIZE);
 
@@ -66,16 +74,20 @@ public class WorldUIController implements Rendering {
         for (ListIterator<Entity> it = chunk.getEntities(); it.hasNext(); ) {
             Entity e = it.next();
 
-            if (e.getBoundingBox().collides(proj.x, proj.y)) {
-                currentEntity = e;
+            if (e instanceof PhysicalEntity ce && ce.getBoundingBox().collides(proj.x, proj.y)) {
+                currentEntity = ce;
                 break;
             }
         }
         if (currentEntity == null) {
             currentBlock = block;
         }
+    }
 
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+    public void mouseClicked(int screenX, int screenY, int pointer, int button) {
+        mouseMoved(screenX, screenY);
+
+        if (button == Input.Buttons.LEFT) {
             if (currentEntity != null) {
                 selectedEntity = currentEntity;
                 selectedBlock = null;
@@ -90,6 +102,7 @@ public class WorldUIController implements Rendering {
     public void render(SpriteBatch batch, ShapeDrawer drawer, Viewport viewport) {
         outlineSelected(drawer);
         outlineCursor(drawer);
+        updateUI();
     }
 
     public void outlineSelected(ShapeDrawer shapeDrawer) {
@@ -145,11 +158,15 @@ public class WorldUIController implements Rendering {
         }
     }
 
-    private float getZoom() {
-        return ((OrthographicCamera) viewport.getCamera()).zoom;
+    private void updateUI() {
+        if (selectedEntity instanceof Robot) {
+            codeButton.setVisible(true);
+        } else {
+            codeButton.setVisible(false);
+        }
     }
 
-    private Vector3 getMouseWorldPos() {
-        return viewport.getCamera().unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+    private float getZoom() {
+        return ((OrthographicCamera) viewport.getCamera()).zoom;
     }
 }

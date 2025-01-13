@@ -1,6 +1,8 @@
 package ru.enzhine.rnb.world.robot.module;
 
-public interface MutablePowerModule extends PowerModule {
+import ru.enzhine.rnb.world.robot.module.open.PowerModule;
+
+public interface MutablePowerModule extends PowerModule, RobotModule {
     float chargeBy(float delta);
 
     boolean isCharged();

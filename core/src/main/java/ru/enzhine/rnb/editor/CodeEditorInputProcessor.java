@@ -1,6 +1,8 @@
 package ru.enzhine.rnb.editor;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import lombok.AllArgsConstructor;
 import ru.enzhine.rnb.editor.input.ShortcutInputAdapter;
 
@@ -11,18 +13,24 @@ import java.awt.datatransfer.StringSelection;
 @AllArgsConstructor
 public class CodeEditorInputProcessor extends ShortcutInputAdapter {
 
+    private final Runnable onEnter;
+    private final InputProcessor previosInputProcessor;
     private final CodeEditor codeEditor;
-//    private final NashornScriptEngine engine;
+
+    private void exit() {
+        // TODO: TEMPORARY
+        Gdx.input.setInputProcessor(previosInputProcessor);
+        codeEditor.setVisible(false);
+    }
 
     @Override
     public boolean keyDown(int keycode) {
         switch (keycode) {
-            case Input.Keys.ENTER -> codeEditor.onNewline();
             case Input.Keys.UP -> codeEditor.up();
             case Input.Keys.DOWN -> codeEditor.down();
             case Input.Keys.LEFT -> codeEditor.left();
             case Input.Keys.RIGHT -> codeEditor.right();
-//            case Input.Keys.ESCAPE -> processScript(); // TODO: TEMPORARY
+            case Input.Keys.ESCAPE -> exit(); // TODO: TEMPORARY
             default -> super.keyDown(keycode);
         }
         return true;
@@ -33,6 +41,7 @@ public class CodeEditorInputProcessor extends ShortcutInputAdapter {
         switch (keycode) {
             case Input.Keys.C -> copyToClipboard();
             case Input.Keys.V -> pasteFromClipboard();
+            case Input.Keys.ENTER -> onEnter.run(); // TODO: TEMPORARY
             default -> super.shortcutExecuted(keycode);
         }
         return true;
@@ -41,6 +50,7 @@ public class CodeEditorInputProcessor extends ShortcutInputAdapter {
     @Override
     public boolean regularKeyTyped(char character) {
         switch (character) {
+            case '\n' -> codeEditor.onNewline();
             case '\b' -> codeEditor.onBackspace();
             case '\t' -> codeEditor.onPaste("   ");
             default -> codeEditor.onPaste(String.valueOf(character));
@@ -65,24 +75,4 @@ public class CodeEditorInputProcessor extends ShortcutInputAdapter {
             System.out.println(ex);
         }
     }
-
-//    private void processScript() {
-//        String text = codeEditor.getText();
-//        System.out.println(text);
-//        try {
-//            final var cs = engine.compile(text);
-//
-//            var thread = new Thread(() -> {
-//                try {
-//                    cs.eval();
-//                } catch (Exception e) {
-//                    throw new RuntimeException(e);
-//                }
-//            });
-//            thread.start();
-//        } catch (ScriptException e) {
-//            throw new RuntimeException(e);
-//        }
-//        codeEditor.setText("");
-//    }
 }

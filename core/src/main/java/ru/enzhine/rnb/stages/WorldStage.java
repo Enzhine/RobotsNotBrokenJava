@@ -1,14 +1,25 @@
 package ru.enzhine.rnb.stages;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Event;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import ru.enzhine.rnb.editor.CodeEditor;
+import ru.enzhine.rnb.editor.CodeEditorInputProcessor;
 import ru.enzhine.rnb.server.RepeatingThreadExecutor;
 import ru.enzhine.rnb.stages.input.WorldUIController;
 import ru.enzhine.rnb.stages.input.MoveController;
@@ -17,9 +28,14 @@ import ru.enzhine.rnb.stages.ui.HelpRenderer;
 import ru.enzhine.rnb.world.WorldImpl;
 import ru.enzhine.rnb.world.block.base.BlockType;
 import ru.enzhine.rnb.world.entity.base.EntityType;
+import ru.enzhine.rnb.world.robot.RobotController;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
+import javax.script.ScriptException;
+
 public class WorldStage extends Stage {
+
+    public static final int TPS = 10;
 
     private final SpriteBatch batch;
     private final ShapeDrawer shapeDrawer;
@@ -48,19 +64,23 @@ public class WorldStage extends Stage {
 
         worldViewport = new ExtendViewport(32 * WorldImpl.BLOCK_PIXEL_SIZE, 32 * WorldImpl.BLOCK_PIXEL_SIZE);
         hudViewport = new ExtendViewport(32 * WorldImpl.BLOCK_PIXEL_SIZE, 32 * WorldImpl.BLOCK_PIXEL_SIZE);
+        setViewport(hudViewport);
 
         zoomController = new ZoomController((OrthographicCamera) worldViewport.getCamera(), 0.06f, 1f);
         moveController = new MoveController(worldViewport);
 
         w = new WorldImpl(10, 43, 0.2f, 0.2f);
         initWorld();
-        serverThread = new RepeatingThreadExecutor(w::onTick, 1);
+        serverThread = new RepeatingThreadExecutor(w::onTick, TPS);
         serverThread.execute();
 
-        worldUIController = new WorldUIController(worldViewport, w);
-        helpRenderer = new HelpRenderer(serverThread);
+        initUI();
+
+        worldUIController = new WorldUIController(worldViewport, w, codeButton);
+        helpRenderer = new HelpRenderer(serverThread, worldUIController);
         helpRenderer.setShowFps(true);
         helpRenderer.setShowTps(true);
+        helpRenderer.setShowSelectionDetails(true);
     }
 
     private void initWorld() {
@@ -77,10 +97,67 @@ public class WorldStage extends Stage {
         focus(robot.getLocation().getX().floatValue() * WorldImpl.BLOCK_PIXEL_SIZE, robot.getLocation().getY().floatValue() * WorldImpl.BLOCK_PIXEL_SIZE, 0.5f, 2f);
     }
 
+    private Table table;
+    private TextButton codeButton;
+    private CodeEditor codeEditor;
+
+    private void initUI() {
+        table = new Table();
+        table.setFillParent(true);
+        addActor(table);
+
+        codeEditor = new CodeEditor();
+        codeEditor.setVisible(false);
+        table.add(codeEditor);
+
+        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
+        style.font = new BitmapFont();
+        style.fontColor = Color.WHITE;
+        codeButton = new TextButton("CODE", style);
+        codeButton.setVisible(false);
+
+        codeButton.addListener(new ClickListener(Input.Buttons.LEFT) {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                codeEditor.setVisible(true);
+                var codeEditorListener = new CodeEditorInputProcessor(() -> {
+                    var robotController = (RobotController) worldUIController.getSelectedEntity();
+                    var se = robotController.getScriptExecutor();
+                    try {
+                        var cs = se.compileScript(codeEditor.getText());
+                        se.execute(cs);
+                    } catch (ScriptException e) {
+                        throw new RuntimeException(e);
+                    }
+                    robotController.bootUp();
+                }, Gdx.input.getInputProcessor(), codeEditor);
+                Gdx.input.setInputProcessor(codeEditorListener);
+            }
+        });
+
+        table.add(codeButton);
+    }
+
+    @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        if (!super.touchDown(screenX, screenY, pointer, button)) {
+            worldUIController.mouseClicked(screenX, screenY, pointer, button);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean mouseMoved(int screenX, int screenY) {
+        worldUIController.mouseMoved(screenX, screenY);
+
+        return super.mouseMoved(screenX, screenY);
+    }
+
     @Override
     public boolean scrolled(float amountX, float amountY) {
         zoomController.onScroll(amountY);
-        return true;
+
+        return super.scrolled(amountX, amountY);
     }
 
     public void resize(int width, int height) {

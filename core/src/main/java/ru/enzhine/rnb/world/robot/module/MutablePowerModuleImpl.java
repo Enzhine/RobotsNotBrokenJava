@@ -2,16 +2,16 @@ package ru.enzhine.rnb.world.robot.module;
 
 import ru.enzhine.rnb.world.robot.RobotController;
 
-public class PowerModuleImpl extends RobotModule implements MutablePowerModule {
+public class MutablePowerModuleImpl extends BasicRobotModule implements MutablePowerModule {
 
     private float powerLevelCurrent;
     private final float powerLevelMax;
 
-    public PowerModuleImpl(RobotController robotController, float maxLevel) {
+    public MutablePowerModuleImpl(RobotController robotController, float maxLevel, float initialCharge) {
         super(robotController);
 
         this.powerLevelMax = maxLevel;
-        this.powerLevelCurrent = 0f;
+        this.powerLevelCurrent = initialCharge;
     }
 
     @Override

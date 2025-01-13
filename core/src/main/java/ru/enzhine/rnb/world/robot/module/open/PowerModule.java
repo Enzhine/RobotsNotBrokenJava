@@ -1,4 +1,4 @@
-package ru.enzhine.rnb.world.robot.module;
+package ru.enzhine.rnb.world.robot.module.open;
 
 /*
     Allowed to players

@@ -57,11 +57,19 @@ public class MathUtils {
         return new Vector3(cerp(from.x, to.x, progress), cerp(from.y, to.y, progress), cerp(from.z, to.z, progress));
     }
 
-    public static long blockPos(float x) {
-        if (x > 0) {
-            return (long) x;
+    public static long blockPos(float xy) {
+        if (xy > 0) {
+            return (long) xy;
         } else {
-            return (long) Math.floor(x);
+            return (long) Math.floor(xy);
+        }
+    }
+
+    public static long blockPos(double xy) {
+        if (xy > 0) {
+            return (long) xy;
+        } else {
+            return (long) Math.floor(xy);
         }
     }
 }

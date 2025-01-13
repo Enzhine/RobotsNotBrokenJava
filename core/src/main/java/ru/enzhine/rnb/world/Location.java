@@ -1,6 +1,8 @@
 package ru.enzhine.rnb.world;
 
 import lombok.ToString;
+import ru.enzhine.rnb.utils.MathUtils;
+import ru.enzhine.rnb.world.block.base.Block;
 
 @ToString
 public class Location {
@@ -72,9 +74,15 @@ public class Location {
         return this.c;
     }
 
-    public Location translated(double x, double y) {
-        Double newX = this.x + x;
-        Double newY = this.y + y;
-        return new Location(newX, newY, this.getWorld().getChunk(newX.longValue(), newY.longValue(), true));
+    public Block getBlock() {
+        return this.c.get(localX, localY);
+    }
+
+    public Location translated(double dx, double dy) {
+        double newX = this.x + dx;
+        double newY = this.y + dy;
+        Chunk newC = c.contains(newX, newY) ? c : getWorld().getChunk(MathUtils.blockPos(newX), MathUtils.blockPos(newY), true);
+
+        return new Location(newX, newY, newC);
     }
 }

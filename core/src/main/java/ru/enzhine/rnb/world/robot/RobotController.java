@@ -13,6 +13,8 @@ public interface RobotController {
 
     ExecutorService getExecutorService();
 
+    ScriptExecutor getScriptExecutor();
+
     boolean isEnabled();
 
     boolean canBootUp();

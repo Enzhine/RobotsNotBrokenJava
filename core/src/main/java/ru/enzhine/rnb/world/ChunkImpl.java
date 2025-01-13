@@ -3,11 +3,14 @@ package ru.enzhine.rnb.world;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import ru.enzhine.rnb.stages.WorldStage;
+import ru.enzhine.rnb.utils.MathUtils;
 import ru.enzhine.rnb.world.block.base.Rendering;
 import ru.enzhine.rnb.utils.adt.Placeable2D;
 import ru.enzhine.rnb.world.block.base.Block;
 import ru.enzhine.rnb.world.block.base.Ticking;
 import ru.enzhine.rnb.world.entity.base.Entity;
+import ru.enzhine.rnb.world.entity.base.PhysicalEntity;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import java.util.Arrays;
@@ -141,6 +144,19 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
     }
 
     @Override
+    public boolean contains(double gX, double gY) {
+        long x = MathUtils.blockPos(gX);
+        long y = MathUtils.blockPos(gY);
+
+        var blX = chunkX * chunkSize;
+        var blY = chunkY * chunkSize;
+        var trX = (chunkX + 1) * chunkSize;
+        var trY = (chunkY + 1) * chunkSize;
+
+        return blX <= x && x < trX && blY <= y && y < trY;
+    }
+
+    @Override
     public boolean isLoaded() {
         return loaded;
     }
@@ -174,9 +190,19 @@ public class ChunkImpl implements Chunk, Placeable2D, Rendering {
 
     @Override
     public void onTick() {
+        float deltaTime = 1f / WorldStage.TPS;
+
         for (Block b : blockLayer) {
             if (b instanceof Ticking ticking) {
                 ticking.onTick();
+            }
+        }
+        for (Entity e : entities) {
+            if (e instanceof Ticking te) {
+                te.onTick();
+            }
+            if (e instanceof PhysicalEntity pe) {
+                pe.onPhysicsUpdate(deltaTime);
             }
         }
     }

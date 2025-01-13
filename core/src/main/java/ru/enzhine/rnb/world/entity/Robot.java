@@ -6,12 +6,16 @@ import ru.enzhine.rnb.world.Location;
 import ru.enzhine.rnb.world.WorldImpl;
 import ru.enzhine.rnb.world.block.base.Ticking;
 import ru.enzhine.rnb.world.entity.base.BasicEntity;
-import ru.enzhine.rnb.world.entity.base.BoundingBox;
+import ru.enzhine.rnb.world.BoundingBox;
 import ru.enzhine.rnb.world.entity.base.EntityType;
-import ru.enzhine.rnb.world.robot.NashornScriptExecutor;
+import ru.enzhine.rnb.world.robot.GraalJavaScriptExecutor;
 import ru.enzhine.rnb.world.robot.RobotController;
-import ru.enzhine.rnb.world.robot.module.RobotModule;
 import ru.enzhine.rnb.world.robot.ScriptExecutor;
+import ru.enzhine.rnb.world.robot.module.MutablePowerModuleImpl;
+import ru.enzhine.rnb.world.robot.module.RobotModule;
+import ru.enzhine.rnb.world.robot.module.TickingMotorModuleImpl;
+import ru.enzhine.rnb.world.robot.module.open.MotorModule;
+import ru.enzhine.rnb.world.robot.module.open.PowerModule;
 
 import javax.script.ScriptException;
 import java.util.LinkedList;
@@ -34,9 +38,12 @@ public class Robot extends BasicEntity implements RobotController, Ticking {
         super(TextureRenderers.getTextureRenderer("entity/robot.json"), EntityType.ROBOT, location, new BoundingBox(-5d / WorldImpl.BLOCK_PIXEL_SIZE, 0d, 11, 11));
 
         this.modules = new LinkedList<>();
-        this.scriptExecutor = new NashornScriptExecutor();
+        this.scriptExecutor = new GraalJavaScriptExecutor();
         this.executorService = Executors.newCachedThreadPool();
         this.enabled = false;
+
+        registerModule(new MutablePowerModuleImpl(this, 100f, 100f));
+        registerModule(new TickingMotorModuleImpl(this, 1f, 0.75f, -0.01f));
     }
 
     @Override
@@ -73,6 +80,11 @@ public class Robot extends BasicEntity implements RobotController, Ticking {
     }
 
     @Override
+    public ScriptExecutor getScriptExecutor() {
+        return scriptExecutor;
+    }
+
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
@@ -88,6 +100,7 @@ public class Robot extends BasicEntity implements RobotController, Ticking {
         if (!canBootUp()) {
             return false;
         }
+        putModules();
 
         toggleRobotSystem(true);
         executorService.submit(() -> {
@@ -108,6 +121,7 @@ public class Robot extends BasicEntity implements RobotController, Ticking {
             return;
         }
 
+        executorService.shutdown();
         final var future = executorService.submit(() -> {
             try {
                 scriptExecutor.invoke("onShutdown");
@@ -121,8 +135,8 @@ public class Robot extends BasicEntity implements RobotController, Ticking {
             } catch (TimeoutException e) {
                 future.cancel(true);
             }
-            toggleRobotSystem(false);
         });
+        toggleRobotSystem(false);
     }
 
     private void toggleRobotSystem(boolean enabled) {
@@ -132,12 +146,6 @@ public class Robot extends BasicEntity implements RobotController, Ticking {
         }
 
         updateRenderingState();
-    }
-
-    private void setRenderingStateIdling() {
-        var context = (StatefulRenderingContext) rendererContext;
-
-        context.setCurrentState(RS_IDLE);
     }
 
     private void updateRenderingState() {
@@ -150,8 +158,31 @@ public class Robot extends BasicEntity implements RobotController, Ticking {
         }
     }
 
+    private void setRenderingStateIdling() {
+        var context = (StatefulRenderingContext) rendererContext;
+
+        context.setCurrentState(RS_IDLE);
+    }
+
     @Override
     public void onTick() {
+        for (RobotModule robotModule : modules) {
+            if(!robotModule.isEnabled()) {
+                return;
+            }
+            if (robotModule instanceof Ticking tickingModule) {
+                tickingModule.onTick();
+            }
+        }
+    }
 
+    private void putModules() {
+        for (RobotModule robotModule : modules) {
+            if (robotModule instanceof MotorModule) {
+                scriptExecutor.inject("motor", robotModule);
+            }else if (robotModule instanceof PowerModule) {
+                scriptExecutor.inject("battery", robotModule);
+            }
+        }
     }
 }

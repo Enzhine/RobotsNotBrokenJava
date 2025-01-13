@@ -8,7 +8,7 @@ public interface ScriptExecutor {
 
     Object invoke(String func, Object... args) throws ScriptException, NoSuchMethodException;
 
-    CompiledScript compileScript(StringBuilder script) throws ScriptException;
+    CompiledScript compileScript(String script) throws ScriptException;
 
     void execute(CompiledScript cs) throws ScriptException;
 

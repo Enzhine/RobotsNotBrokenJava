@@ -33,4 +33,6 @@ public interface Chunk extends Ticking {
     boolean removeEntity(Entity e);
 
     ListIterator<Entity> getEntities();
+
+    boolean contains(double gX, double gY);
 }

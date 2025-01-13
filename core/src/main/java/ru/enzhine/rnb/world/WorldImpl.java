@@ -49,8 +49,7 @@ public class WorldImpl implements World, Rendering {
     }
 
     public long chunkOffset(long xy) {
-        var result = (double) xy / chunkSize;
-        return result > 0 ? (long) result : (long) Math.floor(result);
+        return MathUtils.blockPos((double) xy / chunkSize);
     }
 
     public int chunkLocal(long xy) {

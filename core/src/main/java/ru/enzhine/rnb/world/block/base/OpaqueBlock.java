@@ -7,17 +7,16 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import ru.enzhine.rnb.texture.TextureRenderers;
 import ru.enzhine.rnb.texture.render.TextureRenderer;
 import ru.enzhine.rnb.texture.render.RenderingContext;
-import ru.enzhine.rnb.world.Location;
-import ru.enzhine.rnb.world.Material;
-import ru.enzhine.rnb.world.WorldImpl;
+import ru.enzhine.rnb.world.*;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
-public abstract class OpaqueBlock implements Block, Rendering {
+public abstract class OpaqueBlock implements Block, Rendering, Collidable {
 
     protected final Location loc;
     protected final BlockType type;
     protected final BiomeType biomeType;
     protected final Material material;
+    protected final BoundingBox blockBB;
 
     protected final TextureRenderer<RenderingContext> renderer;
     protected RenderingContext rendererContext;
@@ -31,6 +30,7 @@ public abstract class OpaqueBlock implements Block, Rendering {
         this.type = bt;
         this.biomeType = biomeType;
         this.material = material;
+        this.blockBB = new BoundingBox(0d, 0d, WorldImpl.BLOCK_PIXEL_SIZE, WorldImpl.BLOCK_PIXEL_SIZE);
 
         this.renderer = textureRenderer;
         this.rendererContext = this.renderer.newContext();
@@ -59,6 +59,14 @@ public abstract class OpaqueBlock implements Block, Rendering {
     @Override
     public Material getMaterial() {
         return this.material;
+    }
+
+    @Override
+    public BoundingBox getBoundingBox() {
+        long x = getLocation().getBlockX();
+        long y = getLocation().getBlockY();
+
+        return blockBB.translated(x * WorldImpl.BLOCK_PIXEL_SIZE, y * WorldImpl.BLOCK_PIXEL_SIZE);
     }
 
     private Block atBottom() {

@@ -19,4 +19,9 @@ public class AirBlock extends FloodableBlock {
     public boolean shouldRenderOutline() {
         return false;
     }
+
+    @Override
+    public boolean isPenetrable() {
+        return true;
+    }
 }

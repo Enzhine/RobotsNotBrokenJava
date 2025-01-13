@@ -1,4 +1,4 @@
-package ru.enzhine.rnb.world.entity.base;
+package ru.enzhine.rnb.world;
 
 public interface Collidable {
     BoundingBox getBoundingBox();

@@ -19,6 +19,9 @@ public class ShortcutInputAdapter extends InputAdapter {
         if (keycode == Input.Keys.SPACE) {
             return false;
         }
+        if (keycode == Input.Keys.ENTER) {
+            return false;
+        }
         if (isShortcutEnabled()) {
             return shortcutExecuted(keycode);
         }
@@ -29,6 +32,9 @@ public class ShortcutInputAdapter extends InputAdapter {
     public boolean keyTyped(char character) {
         if (character == ' ' && isShortcutEnabled()) {
             return shortcutExecuted(Input.Keys.SPACE);
+        }
+        if (character == '\n' && isShortcutEnabled()) {
+            return shortcutExecuted(Input.Keys.ENTER);
         }
         return regularKeyTyped(character);
     }

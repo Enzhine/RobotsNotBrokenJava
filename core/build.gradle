@@ -11,5 +11,8 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
-    implementation group: 'org.openjdk.nashorn', name: 'nashorn-core', version: '15.6'
+    implementation 'org.graalvm.sdk:graal-sdk:24.1.1'
+    implementation 'org.graalvm.js:js:24.1.1'
+    implementation 'org.graalvm.js:js-scriptengine:24.1.1'
+//    implementation group: 'org.openjdk.nashorn', name: 'nashorn-core', version: '15.6'
 }
