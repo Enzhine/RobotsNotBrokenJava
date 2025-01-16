@@ -72,11 +72,11 @@ public abstract class BasicEntity implements PhysicalEntity {
 
         var bb = getBoundingBox();
         if (needToOptimize(viewport)) {
-            renderer.renderLow(this.rendererContext, batch, drawer, (int) (bb.getX() * WorldImpl.BLOCK_PIXEL_SIZE), (int) (bb.getY() * WorldImpl.BLOCK_PIXEL_SIZE), bb.getPxWidth(), bb.getPxHeight());
+            renderer.renderLow(this.rendererContext, batch, drawer, (float) (bb.getX() * WorldImpl.BLOCK_PIXEL_SIZE), (float) (bb.getY() * WorldImpl.BLOCK_PIXEL_SIZE), bb.getPxWidth(), bb.getPxHeight());
             return;
         }
 
-        renderer.render(this.rendererContext, batch, (int) (bb.getX() * WorldImpl.BLOCK_PIXEL_SIZE), (int) (bb.getY() * WorldImpl.BLOCK_PIXEL_SIZE), 0, 0, bb.getPxWidth(), bb.getPxHeight());
+        renderer.render(this.rendererContext, batch, (float) (bb.getX() * WorldImpl.BLOCK_PIXEL_SIZE), (float) (bb.getY() * WorldImpl.BLOCK_PIXEL_SIZE), 0, 0, bb.getPxWidth(), bb.getPxHeight());
     }
 
     @Override

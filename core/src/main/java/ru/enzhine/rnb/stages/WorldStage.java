@@ -9,8 +9,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.Event;
-import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -104,6 +102,7 @@ public class WorldStage extends Stage {
     private void initUI() {
         table = new Table();
         table.setFillParent(true);
+        table.align(Align.center);
         addActor(table);
 
         codeEditor = new CodeEditor();
@@ -114,6 +113,7 @@ public class WorldStage extends Stage {
         style.font = new BitmapFont();
         style.fontColor = Color.WHITE;
         codeButton = new TextButton("CODE", style);
+        codeButton.align(Align.bottomRight);
         codeButton.setVisible(false);
 
         codeButton.addListener(new ClickListener(Input.Buttons.LEFT) {
@@ -135,7 +135,14 @@ public class WorldStage extends Stage {
             }
         });
 
-        table.add(codeButton);
+
+        var tempTable = new Table();
+        tempTable.add(codeButton);
+        tempTable.align(Align.right);
+
+        table.add(tempTable).growX();
+        table.setDebug(true);
+        addActor(table);
     }
 
     @Override

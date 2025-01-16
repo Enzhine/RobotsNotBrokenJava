@@ -11,11 +11,11 @@ import ru.enzhine.rnb.world.entity.base.EntityType;
 import ru.enzhine.rnb.world.robot.GraalJavaScriptExecutor;
 import ru.enzhine.rnb.world.robot.RobotController;
 import ru.enzhine.rnb.world.robot.ScriptExecutor;
-import ru.enzhine.rnb.world.robot.module.MutablePowerModuleImpl;
+import ru.enzhine.rnb.world.robot.module.PowerModuleImpl;
 import ru.enzhine.rnb.world.robot.module.RobotModule;
 import ru.enzhine.rnb.world.robot.module.TickingMotorModuleImpl;
-import ru.enzhine.rnb.world.robot.module.open.MotorModule;
-import ru.enzhine.rnb.world.robot.module.open.PowerModule;
+import ru.enzhine.rnb.world.robot.module.MotorModule;
+import ru.enzhine.rnb.world.robot.module.PowerModule;
 
 import javax.script.ScriptException;
 import java.util.LinkedList;
@@ -42,8 +42,8 @@ public class Robot extends BasicEntity implements RobotController, Ticking {
         this.executorService = Executors.newCachedThreadPool();
         this.enabled = false;
 
-        registerModule(new MutablePowerModuleImpl(this, 100f, 100f));
-        registerModule(new TickingMotorModuleImpl(this, 1f, 0.75f, -0.01f));
+        registerModule(new PowerModuleImpl(this, 100f, 100f));
+        registerModule(new TickingMotorModuleImpl(this, 1f, 0.75f, -1f));
     }
 
     @Override
@@ -107,9 +107,10 @@ public class Robot extends BasicEntity implements RobotController, Ticking {
             try {
                 scriptExecutor.invoke("onBoot");
             } catch (ScriptException | NoSuchMethodException e) {
+                System.out.println(e);
                 toggleRobotSystem(false);
             }
-            setRenderingStateIdling();
+//            setRenderingStateIdling();
         });
 
         return true;
@@ -121,7 +122,6 @@ public class Robot extends BasicEntity implements RobotController, Ticking {
             return;
         }
 
-        executorService.shutdown();
         final var future = executorService.submit(() -> {
             try {
                 scriptExecutor.invoke("onShutdown");
@@ -135,6 +135,7 @@ public class Robot extends BasicEntity implements RobotController, Ticking {
             } catch (TimeoutException e) {
                 future.cancel(true);
             }
+            executorService.shutdown();
         });
         toggleRobotSystem(false);
     }

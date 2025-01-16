@@ -14,14 +14,14 @@ public abstract class TransparentBlock extends OpaqueBlock {
 
     public static final float BG_SPEED = 0.1f;
 
-    protected final TextureRenderer bgRenderer;
+    protected final TextureRenderer<RenderingContext> bgRenderer;
     protected final RenderingContext bgRendererContext;
 
     public TransparentBlock(String sprite, String spriteBG, Location loc, BlockType bt, Material material, BiomeType biomeType) {
         this(TextureRenderers.getTextureRenderer(sprite), TextureRenderers.getTextureRenderer(spriteBG), loc, bt, material, biomeType);
     }
 
-    public TransparentBlock(TextureRenderer textureRenderer, TextureRenderer textureBGRenderer, Location loc, BlockType bt, Material material, BiomeType biomeType) {
+    public TransparentBlock(TextureRenderer<RenderingContext> textureRenderer, TextureRenderer<RenderingContext> textureBGRenderer, Location loc, BlockType bt, Material material, BiomeType biomeType) {
         super(textureRenderer, loc, bt, material, biomeType);
         this.bgRenderer = textureBGRenderer;
         this.bgRendererContext = this.bgRenderer.newContext();

@@ -2,7 +2,6 @@ package ru.enzhine.rnb.stages.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -12,6 +11,8 @@ import lombok.Setter;
 import ru.enzhine.rnb.server.RepeatingThreadExecutor;
 import ru.enzhine.rnb.stages.input.WorldUIController;
 import ru.enzhine.rnb.world.block.base.Rendering;
+import ru.enzhine.rnb.world.robot.RobotController;
+import ru.enzhine.rnb.world.robot.module.PowerModule;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 @RequiredArgsConstructor
@@ -48,6 +49,9 @@ public class HelpRenderer implements Rendering, Disposable {
 
             y -= bitmapFont.draw(batch, String.format("TYPE: %s", entity.getType()), x, y).height;
             y -= bitmapFont.draw(batch, String.format("LOC: %.3f %.3f", entity.getLocation().getX(), entity.getLocation().getY()), x, y).height;
+            var rc = (RobotController) entity;
+            var pm = rc.findModule(PowerModule.class);
+            y -= bitmapFont.draw(batch, String.format("POW: %.3f/%.3f", pm.getCurrentLevel(), pm.getMaxLevel()), x, y).height;
             return y - bitmapFont.draw(batch, String.format("VEL: %.3f %.3f", entity.getVelocity().x, entity.getVelocity().y), x, y).height;
         } else if (worldUIController.getSelectedBlock() != null) {
             var block = worldUIController.getSelectedBlock();

@@ -1,13 +1,14 @@
 package ru.enzhine.rnb.world.robot.module;
 
+import org.graalvm.polyglot.HostAccess;
 import ru.enzhine.rnb.world.robot.RobotController;
 
-public class MutablePowerModuleImpl extends BasicRobotModule implements MutablePowerModule {
+public class PowerModuleImpl extends BasicRobotModule implements PowerModule, RobotModule {
 
     private float powerLevelCurrent;
     private final float powerLevelMax;
 
-    public MutablePowerModuleImpl(RobotController robotController, float maxLevel, float initialCharge) {
+    public PowerModuleImpl(RobotController robotController, float maxLevel, float initialCharge) {
         super(robotController);
 
         this.powerLevelMax = maxLevel;
@@ -21,17 +22,15 @@ public class MutablePowerModuleImpl extends BasicRobotModule implements MutableP
             powerLevelCurrent = powerLevelMax;
 
             return overflow;
-        } else if (powerLevelCurrent + delta < 0) {
+        } else if (powerLevelCurrent + delta <= 0) {
             var underflow = powerLevelCurrent + delta;
-            powerLevelCurrent = 0;
+            powerLevelCurrent = 0f;
+            robotController.shutDown();
 
             return underflow;
         } else {
             powerLevelCurrent += delta;
 
-            if (powerLevelCurrent == 0f) {
-                robotController.shutDown();
-            }
             return 0f;
         }
     }
@@ -41,11 +40,13 @@ public class MutablePowerModuleImpl extends BasicRobotModule implements MutableP
         return powerLevelCurrent >= powerLevelMax;
     }
 
+    @HostAccess.Export
     @Override
     public float getMaxLevel() {
         return powerLevelMax;
     }
 
+    @HostAccess.Export
     @Override
     public float getCurrentLevel() {
         return powerLevelCurrent;

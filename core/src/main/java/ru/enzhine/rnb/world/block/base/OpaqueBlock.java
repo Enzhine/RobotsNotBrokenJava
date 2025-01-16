@@ -118,11 +118,11 @@ public abstract class OpaqueBlock implements Block, Rendering, Collidable {
 
         var outlineColor = this.renderer.getOutlineColor(this.rendererContext);
         if (shouldRenderOutline() && outlineColor != null) {
-            drawOutline(drawer, outlineColor);
+            drawOutline(drawer, outlineColor, viewport);
         }
     }
 
-    void drawOutline(ShapeDrawer drawer, Color outlineColor) {
+    void drawOutline(ShapeDrawer drawer, Color outlineColor, Viewport viewport) {
         var bottom = atBottom();
         if (bottom != null && bottom.getMaterial() != getMaterial()) {
             drawer.line(
@@ -131,7 +131,7 @@ public abstract class OpaqueBlock implements Block, Rendering, Collidable {
                     (this.loc.getBlockX() + 1) * WorldImpl.BLOCK_PIXEL_SIZE,
                     this.loc.getBlockY() * WorldImpl.BLOCK_PIXEL_SIZE,
                     outlineColor,
-                    2f
+                    1.5f
             );
         }
         var left = atLeft();
@@ -142,7 +142,7 @@ public abstract class OpaqueBlock implements Block, Rendering, Collidable {
                     this.loc.getBlockX() * WorldImpl.BLOCK_PIXEL_SIZE,
                     (this.loc.getBlockY() + 1) * WorldImpl.BLOCK_PIXEL_SIZE,
                     outlineColor,
-                    2f
+                    1.5f
             );
         }
     }

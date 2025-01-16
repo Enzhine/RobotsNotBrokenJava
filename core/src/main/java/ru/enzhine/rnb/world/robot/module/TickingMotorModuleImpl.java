@@ -1,11 +1,13 @@
 package ru.enzhine.rnb.world.robot.module;
 
+import org.graalvm.polyglot.HostAccess;
+import ru.enzhine.rnb.world.block.base.Ticking;
 import ru.enzhine.rnb.world.entity.base.PhysicalEntity;
 import ru.enzhine.rnb.world.robot.RobotController;
 
-public class TickingMotorModuleImpl extends BasicRobotModule implements TickingMotorModule {
+public class TickingMotorModuleImpl extends BasicRobotModule implements MotorModule, Ticking {
 
-    private final MutablePowerModule mpm;
+    private final PowerModule mpm;
 
     private float speed;
     private final float absSpeed;
@@ -14,7 +16,7 @@ public class TickingMotorModuleImpl extends BasicRobotModule implements TickingM
 
     public TickingMotorModuleImpl(RobotController robotController, float absSpeed, float moveFactor, float dischargeFactor) {
         super(robotController);
-        this.mpm = robotController.findModule(MutablePowerModule.class);
+        this.mpm = robotController.findModule(PowerModule.class);
         assert this.mpm != null;
 
         this.speed = 0f;
@@ -24,17 +26,19 @@ public class TickingMotorModuleImpl extends BasicRobotModule implements TickingM
         this.disFactor = dischargeFactor;
     }
 
+    @HostAccess.Export
     @Override
-    public void setSpeed(float x) {
+    public void setSpeed(double x) {
         if (!isEnabled()) {
             return;
         }
 
-        speed = Math.max(-absSpeed, Math.min(x, absSpeed));
+        speed = Math.max(-absSpeed, Math.min((float) x, absSpeed));
     }
 
+    @HostAccess.Export
     @Override
-    public float maxSpeed() {
+    public double maxSpeed() {
         return absSpeed;
     }
 

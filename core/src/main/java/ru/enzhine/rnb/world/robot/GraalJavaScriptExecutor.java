@@ -11,7 +11,7 @@ import javax.script.*;
 public class GraalJavaScriptExecutor implements ScriptExecutor {
 
     private static final Context.Builder jsEngineConfig =
-            Context.newBuilder("js").allowIO(IOAccess.ALL).allowHostAccess(HostAccess.ALL);
+            Context.newBuilder("js").allowIO(IOAccess.ALL).allowHostAccess(HostAccess.SCOPED);
 
     private ScriptEngine jse;
     private boolean onceExecuted;
