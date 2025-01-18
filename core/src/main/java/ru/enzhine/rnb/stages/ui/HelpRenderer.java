@@ -12,7 +12,7 @@ import ru.enzhine.rnb.server.RepeatingThreadExecutor;
 import ru.enzhine.rnb.stages.input.WorldUIController;
 import ru.enzhine.rnb.world.block.base.Rendering;
 import ru.enzhine.rnb.world.robot.RobotController;
-import ru.enzhine.rnb.world.robot.module.PowerModule;
+import ru.enzhine.rnb.world.robot.module.base.PowerModule;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 @RequiredArgsConstructor

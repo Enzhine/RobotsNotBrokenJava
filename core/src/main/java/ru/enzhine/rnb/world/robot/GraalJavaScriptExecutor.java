@@ -7,6 +7,8 @@ import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.io.IOAccess;
 
 import javax.script.*;
+import java.time.Duration;
+import java.util.concurrent.TimeoutException;
 
 public class GraalJavaScriptExecutor implements ScriptExecutor {
 
@@ -24,6 +26,12 @@ public class GraalJavaScriptExecutor implements ScriptExecutor {
     public void reset() {
         this.jse = GraalJSScriptEngine.create(null, jsEngineConfig);
         this.onceExecuted = false;
+    }
+
+    @Override
+    public void interrupt(Duration timeout) throws TimeoutException {
+        GraalJSScriptEngine ge = (GraalJSScriptEngine) this.jse;
+        ge.getPolyglotContext().interrupt(timeout);
     }
 
     @Override

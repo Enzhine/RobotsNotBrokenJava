@@ -74,7 +74,7 @@ public class WorldStage extends Stage {
 
         initUI();
 
-        worldUIController = new WorldUIController(worldViewport, w, codeButton);
+        worldUIController = new WorldUIController(worldViewport, w, bootButton, codeButton, shutButton);
         helpRenderer = new HelpRenderer(serverThread, worldUIController);
         helpRenderer.setShowFps(true);
         helpRenderer.setShowTps(true);
@@ -96,8 +96,11 @@ public class WorldStage extends Stage {
     }
 
     private Table table;
-    private TextButton codeButton;
     private CodeEditor codeEditor;
+
+    private TextButton codeButton;
+    private TextButton bootButton;
+    private TextButton shutButton;
 
     private void initUI() {
         table = new Table();
@@ -112,10 +115,10 @@ public class WorldStage extends Stage {
         TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
         style.font = new BitmapFont();
         style.fontColor = Color.WHITE;
+
         codeButton = new TextButton("CODE", style);
         codeButton.align(Align.bottomRight);
         codeButton.setVisible(false);
-
         codeButton.addListener(new ClickListener(Input.Buttons.LEFT) {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -129,19 +132,44 @@ public class WorldStage extends Stage {
                     } catch (ScriptException e) {
                         throw new RuntimeException(e);
                     }
-                    robotController.bootUp();
                 }, Gdx.input.getInputProcessor(), codeEditor);
                 Gdx.input.setInputProcessor(codeEditorListener);
             }
         });
 
+        bootButton = new TextButton("BOOT UP", style);
+        bootButton.align(Align.bottomRight);
+        bootButton.setVisible(false);
+        bootButton.addListener(new ClickListener(Input.Buttons.LEFT) {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                var robotController = (RobotController) worldUIController.getSelectedEntity();
+
+                robotController.bootUp();
+            }
+        });
+
+        shutButton = new TextButton("SHUT DOWN", style);
+        shutButton.align(Align.bottomRight);
+        shutButton.setVisible(false);
+        shutButton.addListener(new ClickListener(Input.Buttons.LEFT) {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                var robotController = (RobotController) worldUIController.getSelectedEntity();
+
+                robotController.shutDown();
+                robotController.getScriptExecutor().reset();
+            }
+        });
 
         var tempTable = new Table();
-        tempTable.add(codeButton);
+        tempTable.add(bootButton).row();
+        tempTable.add(codeButton).row();
+        tempTable.add(shutButton).row();
         tempTable.align(Align.right);
 
         table.add(tempTable).growX();
-        table.setDebug(true);
+//        table.setDebug(true);
         addActor(table);
     }
 

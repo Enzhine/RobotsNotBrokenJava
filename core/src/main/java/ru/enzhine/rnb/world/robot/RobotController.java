@@ -1,6 +1,6 @@
 package ru.enzhine.rnb.world.robot;
 
-import ru.enzhine.rnb.world.robot.module.RobotModule;
+import ru.enzhine.rnb.world.robot.module.base.RobotModule;
 
 import java.util.concurrent.ExecutorService;
 
@@ -22,4 +22,6 @@ public interface RobotController {
     boolean bootUp();
 
     void shutDown();
+
+    void callAsyncVoid(String funcName, Object... args);
 }

@@ -11,39 +11,41 @@ import ru.enzhine.rnb.world.entity.base.EntityType;
 import ru.enzhine.rnb.world.robot.GraalJavaScriptExecutor;
 import ru.enzhine.rnb.world.robot.RobotController;
 import ru.enzhine.rnb.world.robot.ScriptExecutor;
-import ru.enzhine.rnb.world.robot.module.PowerModuleImpl;
-import ru.enzhine.rnb.world.robot.module.RobotModule;
-import ru.enzhine.rnb.world.robot.module.TickingMotorModuleImpl;
-import ru.enzhine.rnb.world.robot.module.MotorModule;
-import ru.enzhine.rnb.world.robot.module.PowerModule;
+import ru.enzhine.rnb.world.robot.module.*;
+import ru.enzhine.rnb.world.robot.module.base.*;
 
 import javax.script.ScriptException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.*;
 
 public class Robot extends BasicEntity implements RobotController, Ticking {
 
-    private final List<RobotModule> modules;
-    private final ScriptExecutor scriptExecutor;
-    private final ExecutorService executorService;
-
-    private boolean enabled;
-
     private static final int RS_ENABLED = 0;
     private static final int RS_DISABLED = 1;
     private static final int RS_IDLE = 2;
+
+    private final List<RobotModule> modules;
+    private final ScriptExecutor scriptExecutor;
+
+    private ExecutorService executorService;
+    private boolean enabled;
 
     public Robot(Location location) {
         super(TextureRenderers.getTextureRenderer("entity/robot.json"), EntityType.ROBOT, location, new BoundingBox(-5d / WorldImpl.BLOCK_PIXEL_SIZE, 0d, 11, 11));
 
         this.modules = new LinkedList<>();
         this.scriptExecutor = new GraalJavaScriptExecutor();
-        this.executorService = Executors.newCachedThreadPool();
         this.enabled = false;
+        resetExecutorService();
 
-        registerModule(new PowerModuleImpl(this, 100f, 100f));
-        registerModule(new TickingMotorModuleImpl(this, 1f, 0.75f, -1f));
+        var robotModuleFactory = new RobotModuleFactoryImpl();
+        registerModule(robotModuleFactory.makeRobotModule(RobotModuleType.BATTERY_V1, this));
+        registerModule(robotModuleFactory.makeRobotModule(RobotModuleType.MOTOR_V1, this));
+        registerModule(robotModuleFactory.makeRobotModule(RobotModuleType.COLLIDER_V1, this));
     }
 
     @Override
@@ -92,7 +94,11 @@ public class Robot extends BasicEntity implements RobotController, Ticking {
     @Override
     public boolean canBootUp() {
         var pool = (ThreadPoolExecutor) executorService;
-        return scriptExecutor.isOnceExecuted() && pool.getActiveCount() == 0;
+        return !enabled && scriptExecutor.isOnceExecuted() && pool.getActiveCount() == 0;
+    }
+
+    private void resetExecutorService() {
+        executorService = Executors.newCachedThreadPool();
     }
 
     @Override
@@ -100,6 +106,7 @@ public class Robot extends BasicEntity implements RobotController, Ticking {
         if (!canBootUp()) {
             return false;
         }
+        resetExecutorService();
         putModules();
 
         toggleRobotSystem(true);
@@ -110,7 +117,6 @@ public class Robot extends BasicEntity implements RobotController, Ticking {
                 System.out.println(e);
                 toggleRobotSystem(false);
             }
-//            setRenderingStateIdling();
         });
 
         return true;
@@ -131,13 +137,25 @@ public class Robot extends BasicEntity implements RobotController, Ticking {
         executorService.submit(() -> {
             try {
                 future.get(1, TimeUnit.SECONDS);
-            } catch (ExecutionException | InterruptedException ignored) {
-            } catch (TimeoutException e) {
-                future.cancel(true);
+            } catch (ExecutionException | InterruptedException | TimeoutException ignored) {
             }
-            executorService.shutdown();
+            try {
+                getScriptExecutor().interrupt(Duration.of(1, ChronoUnit.SECONDS));
+                executorService.shutdown();
+            } catch (TimeoutException ignored) {
+            }
         });
         toggleRobotSystem(false);
+    }
+
+    @Override
+    public void callAsyncVoid(String funcName, Object... args) {
+        executorService.submit(() -> {
+            try {
+                scriptExecutor.invoke(funcName, args);
+            } catch (ScriptException | NoSuchMethodException ignored) {
+            }
+        });
     }
 
     private void toggleRobotSystem(boolean enabled) {
@@ -168,7 +186,7 @@ public class Robot extends BasicEntity implements RobotController, Ticking {
     @Override
     public void onTick() {
         for (RobotModule robotModule : modules) {
-            if(!robotModule.isEnabled()) {
+            if (!robotModule.isEnabled()) {
                 return;
             }
             if (robotModule instanceof Ticking tickingModule) {
@@ -178,11 +196,15 @@ public class Robot extends BasicEntity implements RobotController, Ticking {
     }
 
     private void putModules() {
+        var alreadyPut = new LinkedHashSet<String>();
+
         for (RobotModule robotModule : modules) {
-            if (robotModule instanceof MotorModule) {
-                scriptExecutor.inject("motor", robotModule);
-            }else if (robotModule instanceof PowerModule) {
-                scriptExecutor.inject("battery", robotModule);
+            var placeholder = robotModule.getType().placeholder;
+
+            if (alreadyPut.add(placeholder)) {
+                scriptExecutor.inject(placeholder, robotModule);
+            } else {
+                throw new RuntimeException("Executor can not contain modules with same placeholder");
             }
         }
     }

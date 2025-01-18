@@ -4,8 +4,12 @@ import org.graalvm.polyglot.HostAccess;
 import ru.enzhine.rnb.world.block.base.Ticking;
 import ru.enzhine.rnb.world.entity.base.PhysicalEntity;
 import ru.enzhine.rnb.world.robot.RobotController;
+import ru.enzhine.rnb.world.robot.module.base.BasicRobotModule;
+import ru.enzhine.rnb.world.robot.module.base.MotorModule;
+import ru.enzhine.rnb.world.robot.module.base.PowerModule;
+import ru.enzhine.rnb.world.robot.module.base.RobotModuleType;
 
-public class TickingMotorModuleImpl extends BasicRobotModule implements MotorModule, Ticking {
+public class MotorModuleImpl extends BasicRobotModule implements MotorModule, Ticking {
 
     private final PowerModule mpm;
 
@@ -13,15 +17,18 @@ public class TickingMotorModuleImpl extends BasicRobotModule implements MotorMod
     private final float absSpeed;
     private final float moveFactor;
     private final float disFactor;
+    private final float tickDischarge;
 
-    public TickingMotorModuleImpl(RobotController robotController, float absSpeed, float moveFactor, float dischargeFactor) {
-        super(robotController);
+    public MotorModuleImpl(RobotController robotController, RobotModuleType type, float absSpeed, float moveFactor, float dischargeFactor, float tickDischarge) {
+        super(robotController, type);
         this.mpm = robotController.findModule(PowerModule.class);
         assert this.mpm != null;
 
         this.speed = 0f;
         this.absSpeed = absSpeed;
         this.moveFactor = moveFactor;
+        assert tickDischarge < 0f;
+        this.tickDischarge = tickDischarge;
         assert dischargeFactor < 0f;
         this.disFactor = dischargeFactor;
     }
@@ -38,7 +45,7 @@ public class TickingMotorModuleImpl extends BasicRobotModule implements MotorMod
 
     @HostAccess.Export
     @Override
-    public double maxSpeed() {
+    public double getMaxSpeed() {
         return absSpeed;
     }
 
@@ -47,6 +54,6 @@ public class TickingMotorModuleImpl extends BasicRobotModule implements MotorMod
         var robot = (PhysicalEntity) robotController;
 
         robot.appendVelocity(speed * moveFactor, 0f);
-        mpm.chargeBy(Math.abs(speed) * disFactor);
+        mpm.chargeBy(Math.abs(speed) * disFactor + tickDischarge);
     }
 }

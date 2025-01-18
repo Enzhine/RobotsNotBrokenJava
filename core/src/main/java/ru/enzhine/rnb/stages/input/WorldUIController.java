@@ -27,7 +27,9 @@ public class WorldUIController implements Rendering {
 
     private final Viewport viewport;
     private final World world;
+    private TextButton bootButton;
     private TextButton codeButton;
+    private TextButton shutButton;
 
     @Getter
     private Block currentBlock;
@@ -42,10 +44,12 @@ public class WorldUIController implements Rendering {
     private float secondsAccumulation;
 
 
-    public WorldUIController(Viewport viewport, World world, TextButton codeButton) {
+    public WorldUIController(Viewport viewport, World world, TextButton bootButton, TextButton codeButton, TextButton shutButton) {
         this.viewport = viewport;
         this.world = world;
+        this.bootButton = bootButton;
         this.codeButton = codeButton;
+        this.shutButton = shutButton;
 
         this.secondsThreshold = 1f;
         this.secondsAccumulation = 0f;
@@ -160,9 +164,13 @@ public class WorldUIController implements Rendering {
 
     private void updateUI() {
         if (selectedEntity instanceof Robot) {
+            bootButton.setVisible(true);
             codeButton.setVisible(true);
+            shutButton.setVisible(true);
         } else {
+            bootButton.setVisible(false);
             codeButton.setVisible(false);
+            shutButton.setVisible(false);
         }
     }
 

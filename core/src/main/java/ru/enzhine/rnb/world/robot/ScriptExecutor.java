@@ -2,6 +2,8 @@ package ru.enzhine.rnb.world.robot;
 
 import javax.script.CompiledScript;
 import javax.script.ScriptException;
+import java.time.Duration;
+import java.util.concurrent.TimeoutException;
 
 public interface ScriptExecutor {
     void inject(String key, Object value);
@@ -13,6 +15,8 @@ public interface ScriptExecutor {
     void execute(CompiledScript cs) throws ScriptException;
 
     boolean isOnceExecuted();
+
+    void interrupt(Duration timeout) throws TimeoutException;
 
     void reset();
 }
