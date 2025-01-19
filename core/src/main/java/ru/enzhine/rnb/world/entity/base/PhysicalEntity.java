@@ -5,9 +5,9 @@ import ru.enzhine.rnb.world.Collidable;
 
 public interface PhysicalEntity extends Entity, Collidable {
 
-    Vector2 getVelocity();
+    Vector2 getActualVelocity();
 
-    void setVelocity(Vector2 velocity);
+    Vector2 getVelocity();
 
     void appendVelocity(float dx, float dy);
 

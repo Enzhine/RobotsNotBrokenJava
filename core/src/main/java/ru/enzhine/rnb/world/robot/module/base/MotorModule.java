@@ -4,4 +4,6 @@ public interface MotorModule extends RobotModule {
     void setSpeed(double x);
 
     double getMaxSpeed();
+
+    double getCurrentSpeed();
 }

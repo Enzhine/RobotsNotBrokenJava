@@ -52,9 +52,11 @@ public class HelpRenderer implements Rendering, Disposable {
             var rc = (RobotController) entity;
             var pm = rc.findModule(PowerModule.class);
             y -= bitmapFont.draw(batch, String.format("POW: %.3f/%.3f", pm.getCurrentLevel(), pm.getMaxLevel()), x, y).height;
-            return y - bitmapFont.draw(batch, String.format("VEL: %.3f %.3f", entity.getVelocity().x, entity.getVelocity().y), x, y).height;
+            return y - bitmapFont.draw(batch, String.format("VEL: %.3f %.3f", entity.getActualVelocity().x, entity.getActualVelocity().y), x, y).height;
         } else if (worldUIController.getSelectedBlock() != null) {
             var block = worldUIController.getSelectedBlock();
+
+            y -= bitmapFont.draw(batch, String.format("TYPE: %s", block.getType()), x, y).height;
         }
         return y;
     }

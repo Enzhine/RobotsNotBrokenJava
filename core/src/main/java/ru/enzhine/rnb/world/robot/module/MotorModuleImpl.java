@@ -49,6 +49,12 @@ public class MotorModuleImpl extends BasicRobotModule implements MotorModule, Ti
         return absSpeed;
     }
 
+    @HostAccess.Export
+    @Override
+    public double getCurrentSpeed() {
+        return speed;
+    }
+
     @Override
     public void onTick() {
         var robot = (PhysicalEntity) robotController;

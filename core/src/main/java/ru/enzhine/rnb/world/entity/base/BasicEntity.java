@@ -25,6 +25,7 @@ public abstract class BasicEntity implements PhysicalEntity {
     protected RenderingContext rendererContext;
 
     protected final Vector2 velocity;
+    protected final Vector2 actualVelocity;
 
     public BasicEntity(TextureRenderer<RenderingContext> textureRenderer, EntityType entityType, Location location, BoundingBox boundingBox) {
         this.loc = location;
@@ -33,6 +34,7 @@ public abstract class BasicEntity implements PhysicalEntity {
         this.renderer = textureRenderer;
         this.rendererContext = this.renderer.newContext();
         this.velocity = new Vector2(0f, 0f);
+        this.actualVelocity = new Vector2(0f, 0f);
     }
 
     @Override
@@ -85,8 +87,8 @@ public abstract class BasicEntity implements PhysicalEntity {
     }
 
     @Override
-    public void setVelocity(Vector2 velocity) {
-        this.velocity.set(velocity);
+    public Vector2 getActualVelocity() {
+        return actualVelocity;
     }
 
     @Override
@@ -101,29 +103,78 @@ public abstract class BasicEntity implements PhysicalEntity {
         if (at.isPenetrable()) {
             processMovement(deltaTime);
         }
-        setVelocity(Vector2.Zero);
     }
 
     private void processMovement(float deltaTime) {
+        actualVelocity.set(velocity);
+
         double dx = velocity.x * deltaTime;
-        double dy = velocity.y * deltaTime;
-        var newBB = getBoundingBox().translated(dx, dy);
+        var newBB = getBoundingBox().translated(dx, 0f);
 
-        var bottomLeft = getAt(newBB.leftX(), newBB.bottomY());
-        var topLeft = getAt(newBB.leftX(), newBB.topY());
-        var topRight = getAt(newBB.rightX(), newBB.topY());
-        var bottomRight = getAt(newBB.rightX(), newBB.bottomY());
+        var newX = getLocation().getX() + dx;
+        if (dx < 0) {
+            var bottomLeft = getAt(newBB.leftX(), newBB.bottomY());
+            var topLeft = getAt(newBB.leftX(), newBB.topY());
 
-        if (bottomLeft.isPenetrable() && topLeft.isPenetrable() &&
-                topRight.isPenetrable() && bottomRight.isPenetrable()) {
-            var newLoc = getLocation().translated(dx, dy);
-
-            if (newLoc.getChunk() != getLocation().getChunk()) {
-                getLocation().getChunk().removeEntity(this);
-                newLoc.getChunk().addEntity(this);
+            if (!bottomLeft.isPenetrable() || !topLeft.isPenetrable()) {
+                newX = Math.max(
+                        bottomLeft.getLocation().getX() + 1,
+                        topLeft.getLocation().getX() + 1
+                );
+                actualVelocity.x = 0f;
             }
-            setLocation(newLoc);
+        } else {
+            var topRight = getAt(newBB.rightX(), newBB.topY());
+            var bottomRight = getAt(newBB.rightX(), newBB.bottomY());
+
+            if (!topRight.isPenetrable() || !bottomRight.isPenetrable()) {
+                final var width = (double) getBoundingBox().getPxWidth() / WorldImpl.BLOCK_PIXEL_SIZE + 0.001f;
+                newX = Math.min(
+                        topRight.getLocation().getX() - width,
+                        bottomRight.getLocation().getX() - width
+                );
+                actualVelocity.x = 0f;
+            }
         }
+
+        double dy = velocity.y * deltaTime;
+        newBB = getBoundingBox().translated(0f, dy);
+
+        var newY = getLocation().getY() + dy;
+        if (dy < 0) {
+            var bottomLeft = getAt(newBB.leftX(), newBB.bottomY());
+            var bottomRight = getAt(newBB.rightX(), newBB.bottomY());
+
+            if (!bottomLeft.isPenetrable() || !bottomRight.isPenetrable()) {
+                newY = Math.max(
+                        bottomLeft.getLocation().getY() + 1,
+                        bottomRight.getLocation().getY() + 1
+                );
+                actualVelocity.y = 0f;
+            }
+        } else {
+            var topLeft = getAt(newBB.leftX(), newBB.topY());
+            var topRight = getAt(newBB.rightX(), newBB.topY());
+
+            if (!topLeft.isPenetrable() || !topRight.isPenetrable()) {
+                final var height = (double) getBoundingBox().getPxHeight() / WorldImpl.BLOCK_PIXEL_SIZE + 0.001f;
+                newY = Math.min(
+                        topLeft.getLocation().getY() - height,
+                        topRight.getLocation().getY() - height
+                );
+                actualVelocity.y = 0f;
+            }
+        }
+
+        final var newChunk = getLocation().getChunk().contains(newX, newY) ? getLocation().getChunk() :
+                getLocation().getWorld().getChunk(MathUtils.blockPos(newX), MathUtils.blockPos(newY), true);
+        final var newLoc = new Location(newX, newY, newChunk);
+        if (newLoc.getChunk() != getLocation().getChunk()) {
+            getLocation().getChunk().removeEntity(this);
+            newLoc.getChunk().addEntity(this);
+        }
+        setLocation(newLoc);
+        velocity.set(Vector2.Zero);
     }
 
     private Block getAt(double x, double y) {

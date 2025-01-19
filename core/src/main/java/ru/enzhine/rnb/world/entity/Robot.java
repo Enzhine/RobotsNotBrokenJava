@@ -35,17 +35,12 @@ public class Robot extends BasicEntity implements RobotController, Ticking {
     private boolean enabled;
 
     public Robot(Location location) {
-        super(TextureRenderers.getTextureRenderer("entity/robot.json"), EntityType.ROBOT, location, new BoundingBox(-5d / WorldImpl.BLOCK_PIXEL_SIZE, 0d, 11, 11));
+        super(TextureRenderers.getTextureRenderer("entity/robot.json"), EntityType.ROBOT, location, new BoundingBox(0d, 0d, 11, 11));
 
         this.modules = new LinkedList<>();
         this.scriptExecutor = new GraalJavaScriptExecutor();
         this.enabled = false;
         resetExecutorService();
-
-        var robotModuleFactory = new RobotModuleFactoryImpl();
-        registerModule(robotModuleFactory.makeRobotModule(RobotModuleType.BATTERY_V1, this));
-        registerModule(robotModuleFactory.makeRobotModule(RobotModuleType.MOTOR_V1, this));
-        registerModule(robotModuleFactory.makeRobotModule(RobotModuleType.COLLIDER_V1, this));
     }
 
     @Override
