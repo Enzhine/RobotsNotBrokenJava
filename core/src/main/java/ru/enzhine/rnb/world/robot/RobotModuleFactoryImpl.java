@@ -1,7 +1,8 @@
-package ru.enzhine.rnb.world.robot.module.base;
+package ru.enzhine.rnb.world.robot;
 
-import ru.enzhine.rnb.world.robot.RobotController;
 import ru.enzhine.rnb.world.robot.module.*;
+import ru.enzhine.rnb.world.robot.module.base.RobotModule;
+import ru.enzhine.rnb.world.robot.module.base.RobotModuleType;
 
 public class RobotModuleFactoryImpl implements RobotModuleFactory {
     @Override

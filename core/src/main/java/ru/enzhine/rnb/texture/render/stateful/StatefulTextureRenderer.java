@@ -79,13 +79,4 @@ public class StatefulTextureRenderer implements TextureRenderer<StatefulRenderin
     private TextureRenderer<RenderingContext> getCurrentTextureRenderer(StatefulRenderingContext context) {
         return preparedStates.get(context.getCurrentState());
     }
-
-    private void processReferences() {
-        for (var entry : states.entrySet()) {
-            if (entry.getValue() instanceof RefTextureRenderer) {
-                var path = ((RefTextureRenderer) entry.getValue()).getPath();
-                entry.setValue(TextureRenderers.getTextureRenderer(path));
-            }
-        }
-    }
 }

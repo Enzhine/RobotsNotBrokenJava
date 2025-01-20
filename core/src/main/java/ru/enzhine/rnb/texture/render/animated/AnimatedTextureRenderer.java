@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.extern.jackson.Jacksonized;
@@ -12,7 +13,7 @@ import ru.enzhine.rnb.texture.outline.AverageOutlineColor;
 import ru.enzhine.rnb.texture.outline.OutlineColorStrategy;
 import ru.enzhine.rnb.texture.preprocessor.TexturePreprocessor;
 import ru.enzhine.rnb.texture.render.TextureRenderer;
-import ru.enzhine.rnb.texture.render.TextureRendererProperties;
+import ru.enzhine.rnb.texture.render.statical.TextureRendererProperties;
 import ru.enzhine.rnb.utils.TextureUtils;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 

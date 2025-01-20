@@ -1,4 +1,4 @@
-package ru.enzhine.rnb.texture.render;
+package ru.enzhine.rnb.texture.render.statical;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -9,6 +9,8 @@ import ru.enzhine.rnb.texture.exception.TextureRendererException;
 import ru.enzhine.rnb.texture.outline.AverageOutlineColor;
 import ru.enzhine.rnb.texture.outline.OutlineColorStrategy;
 import ru.enzhine.rnb.texture.preprocessor.TexturePreprocessor;
+import ru.enzhine.rnb.texture.render.RenderingContext;
+import ru.enzhine.rnb.texture.render.TextureRenderer;
 import ru.enzhine.rnb.utils.TextureUtils;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 

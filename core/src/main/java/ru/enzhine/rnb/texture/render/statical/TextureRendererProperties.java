@@ -1,4 +1,4 @@
-package ru.enzhine.rnb.texture.render;
+package ru.enzhine.rnb.texture.render.statical;
 
 import com.badlogic.gdx.graphics.Texture;
 import lombok.*;

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.enzhine.rnb.texture.exception.TextureRendererException;
 import ru.enzhine.rnb.texture.preprocessor.PathTexturePreprocessor;
 import ru.enzhine.rnb.texture.render.RenderingContext;
-import ru.enzhine.rnb.texture.render.StaticTextureRenderer;
+import ru.enzhine.rnb.texture.render.statical.StaticTextureRenderer;
 import ru.enzhine.rnb.texture.render.TextureRenderer;
 
 import java.io.IOException;

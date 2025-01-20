@@ -25,11 +25,15 @@ import ru.enzhine.rnb.stages.input.ZoomController;
 import ru.enzhine.rnb.stages.ui.HelpRenderer;
 import ru.enzhine.rnb.world.WorldImpl;
 import ru.enzhine.rnb.world.block.base.BlockType;
+import ru.enzhine.rnb.world.entity.Robot;
 import ru.enzhine.rnb.world.entity.base.EntityType;
+import ru.enzhine.rnb.world.item.base.ItemStackFactoryImpl;
+import ru.enzhine.rnb.world.item.base.ItemType;
 import ru.enzhine.rnb.world.robot.RobotController;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import javax.script.ScriptException;
+import java.util.Random;
 
 public class WorldStage extends Stage {
 
@@ -90,8 +94,12 @@ public class WorldStage extends Stage {
         w.setBlock(BlockType.AIR, 5L, 4L);
         w.setBlock(BlockType.AIR, 4L, 5L);
         w.setBlock(BlockType.AIR, 5L, 5L);
-        var robot = w.summonEntity(EntityType.ROBOT, 5d, 4d);
+        var robot = (Robot) w.summonEntity(EntityType.ROBOT, 5d, 4d);
 
+        var itemStackFactory = new ItemStackFactoryImpl();
+        var rand = new Random();
+        robot.getInventory().setAt(0, itemStackFactory.makeItemstack(ItemType.COAL_ORE_SHARD, 1, rand));
+        robot.pickHandItem(0);
         focus(robot.getLocation().getX().floatValue() * WorldImpl.BLOCK_PIXEL_SIZE, robot.getLocation().getY().floatValue() * WorldImpl.BLOCK_PIXEL_SIZE, 0.5f, 2f);
     }
 

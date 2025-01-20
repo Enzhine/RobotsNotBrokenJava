@@ -1,7 +1,7 @@
 package ru.enzhine.rnb.world.entity.base;
 
 import ru.enzhine.rnb.world.Location;
-import ru.enzhine.rnb.world.block.base.Rendering;
+import ru.enzhine.rnb.render.Rendering;
 
 public interface Entity extends Rendering {
 

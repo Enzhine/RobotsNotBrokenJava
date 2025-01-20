@@ -8,7 +8,7 @@ import ru.enzhine.rnb.utils.ImmutablePair;
 import ru.enzhine.rnb.utils.MathUtils;
 import ru.enzhine.rnb.world.block.base.BlockFactory;
 import ru.enzhine.rnb.world.block.base.BlockType;
-import ru.enzhine.rnb.world.block.base.Rendering;
+import ru.enzhine.rnb.render.Rendering;
 import ru.enzhine.rnb.utils.adt.Map2D;
 import ru.enzhine.rnb.utils.adt.TreeMap2D;
 import ru.enzhine.rnb.world.block.base.BlockFactoryImpl;

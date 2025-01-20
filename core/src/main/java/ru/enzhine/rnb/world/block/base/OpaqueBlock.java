@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import ru.enzhine.rnb.render.Rendering;
 import ru.enzhine.rnb.texture.TextureRenderers;
 import ru.enzhine.rnb.texture.render.TextureRenderer;
 import ru.enzhine.rnb.texture.render.RenderingContext;

@@ -1,6 +1,5 @@
 package ru.enzhine.rnb.stages.input;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -9,14 +8,13 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import lombok.Getter;
-import ru.enzhine.rnb.stages.WorldStage;
 import ru.enzhine.rnb.utils.MathUtils;
 import ru.enzhine.rnb.world.Chunk;
 import ru.enzhine.rnb.world.World;
 import ru.enzhine.rnb.world.WorldImpl;
 import ru.enzhine.rnb.world.block.base.Block;
-import ru.enzhine.rnb.world.block.base.Rendering;
-import ru.enzhine.rnb.world.entity.Robot;
+import ru.enzhine.rnb.render.Rendering;
+import ru.enzhine.rnb.world.entity.RobotImpl;
 import ru.enzhine.rnb.world.entity.base.PhysicalEntity;
 import ru.enzhine.rnb.world.entity.base.Entity;
 import space.earlygrey.shapedrawer.ShapeDrawer;
@@ -163,7 +161,7 @@ public class WorldUIController implements Rendering {
     }
 
     private void updateUI() {
-        if (selectedEntity instanceof Robot) {
+        if (selectedEntity instanceof RobotImpl) {
             bootButton.setVisible(true);
             codeButton.setVisible(true);
             shutButton.setVisible(true);

@@ -1,4 +1,4 @@
-package ru.enzhine.rnb.world.block.base;
+package ru.enzhine.rnb.render;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;

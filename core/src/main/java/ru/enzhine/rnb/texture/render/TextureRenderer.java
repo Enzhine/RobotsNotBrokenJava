@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import ru.enzhine.rnb.texture.render.animated.AnimatedTextureRenderer;
 import ru.enzhine.rnb.texture.render.stateful.StatefulTextureRenderer;
+import ru.enzhine.rnb.texture.render.statical.StaticTextureRenderer;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 @JsonTypeInfo(

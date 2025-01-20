@@ -1,0 +1,62 @@
+{
+  "type": "stateful",
+  "beginState": 1,
+  "states": {
+    "0": {
+      "type": "static",
+      "src": {
+        "type": "part",
+        "from": {
+          "type": "path",
+          "path": "item/stone_shard.png"
+        },
+        "x": 0,
+        "y": 0,
+        "width": 16,
+        "height": 16
+      }
+    },
+    "1": {
+      "type": "static",
+      "src": {
+        "type": "part",
+        "from": {
+          "type": "path",
+          "path": "item/stone_shard.png"
+        },
+        "x": 16,
+        "y": 0,
+        "width": 16,
+        "height": 16
+      }
+    },
+    "2": {
+      "type": "static",
+      "src": {
+        "type": "part",
+        "from": {
+          "type": "path",
+          "path": "item/stone_shard.png"
+        },
+        "x": 0,
+        "y": 16,
+        "width": 16,
+        "height": 16
+      }
+    },
+    "3": {
+      "type": "static",
+      "src": {
+        "type": "part",
+        "from": {
+          "type": "path",
+          "path": "item/stone_shard.png"
+        },
+        "x": 16,
+        "y": 16,
+        "width": 16,
+        "height": 16
+      }
+    }
+  }
+}
